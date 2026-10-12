@@ -103,11 +103,9 @@ actor APIClient {
 
     var baseURL: URL {
         #if DEBUG
-        // TODO: point at local Nest server when running
         URL(string: "http://localhost:3000")!
         #else
-        // TODO: replace with production Render URL
-        URL(string: "https://unearth-api.onrender.com")!
+        URL(string: "https://unearth-1o4a.onrender.com")!
         #endif
     }
 

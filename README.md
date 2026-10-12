@@ -30,6 +30,8 @@ npm run dev
 
 Health check: `GET http://localhost:3000/health` → `{ "ok": true }`
 
+**Production:** [https://unearth-1o4a.onrender.com](https://unearth-1o4a.onrender.com) — `GET /health` → `{ "ok": true }`
+
 ### Environment (Render)
 
 | Variable | Purpose |
@@ -52,7 +54,7 @@ open Unearth.xcodeproj
 
 1. Set your **Signing Team** on the Unearth target.
 2. Enable **Sign in with Apple** capability (entitlements file included).
-3. DEBUG builds use `http://localhost:3000` and include a mock sign-in. RELEASE points at the Render URL in `APIClient`.
+3. DEBUG builds use `http://localhost:3000` and include a mock sign-in. RELEASE points at `https://unearth-1o4a.onrender.com`.
 4. Run on a simulator or device.
 
 Fonts: Bricolage Grotesque + DM Sans (OFL) are bundled under `Unearth/Resources/Fonts/` and registered in `Info.plist`.
