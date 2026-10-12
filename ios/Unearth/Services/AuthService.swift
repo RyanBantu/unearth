@@ -13,6 +13,8 @@ final class AuthService {
     private(set) var hasCompletedOnboarding = false
     private(set) var pendingAppleUserId: String?
     private(set) var needsHandle = false
+    /// Last auth error to show in the UI (e.g. Render missing APPLE_* keys).
+    private(set) var lastError: String?
 
     init() {
         restoreSession()
@@ -43,71 +45,59 @@ final class AuthService {
         #endif
     }
 
-    func handleAppleSignIn(credential: ASAuthorizationAppleIDCredential) async {
+    /// Returns `true` only when the server accepted Sign in with Apple.
+    @discardableResult
+    func handleAppleSignIn(credential: ASAuthorizationAppleIDCredential) async -> Bool {
+        lastError = nil
         let userId = credential.user
         pendingAppleUserId = userId
 
-        let identityToken = credential.identityToken.flatMap { String(data: $0, encoding: .utf8) }
-        let authCode = credential.authorizationCode.flatMap { String(data: $0, encoding: .utf8) }
-
-        if let identityToken, let authCode {
-            do {
-                let fullName: PersonNameComponentsDTO? = {
-                    guard let name = credential.fullName else { return nil }
-                    return PersonNameComponentsDTO(
-                        givenName: name.givenName,
-                        familyName: name.familyName
-                    )
-                }()
-                let response = try await APIClient.shared.authApple(
-                    AppleAuthBody(
-                        identityToken: identityToken,
-                        authorizationCode: authCode,
-                        fullName: fullName
-                    )
-                )
-                storeTokens(access: response.accessToken, refresh: response.refreshToken)
-                await APIClient.shared.setTokens(access: response.accessToken, refresh: response.refreshToken)
-                persist(user: response.user)
-                isAuthenticated = true
-                needsHandle = response.needsHandle ?? (response.user.handle.isEmpty)
-                if !needsHandle {
-                    hasCompletedOnboarding = true
-                    UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
-                }
-                return
-            } catch {
-                // Fall through to local session when API unreachable
-            }
+        guard
+            let identityToken = credential.identityToken.flatMap({ String(data: $0, encoding: .utf8) }),
+            let authCode = credential.authorizationCode.flatMap({ String(data: $0, encoding: .utf8) })
+        else {
+            lastError = "Apple did not return a token. Try again."
+            return false
         }
 
-        // Local fallback when backend is unavailable
-        let token = "debug.\(userId)"
-        storeTokens(access: token, refresh: nil)
-        await APIClient.shared.setAuthToken(token)
-        isAuthenticated = true
-
-        if let existingHandle = KeychainStore.string(forKey: KeychainStore.Keys.handle), !existingHandle.isEmpty {
-            let user = User(
-                id: UUID(),
-                handle: existingHandle,
-                appleUserId: userId,
-                gemsUnearthed: 0,
-                firstFindsCount: 0,
-                prospectorLevel: .digger
+        do {
+            let fullName: PersonNameComponentsDTO? = {
+                guard let name = credential.fullName else { return nil }
+                return PersonNameComponentsDTO(
+                    givenName: name.givenName,
+                    familyName: name.familyName
+                )
+            }()
+            let response = try await APIClient.shared.authApple(
+                AppleAuthBody(
+                    identityToken: identityToken,
+                    authorizationCode: authCode,
+                    fullName: fullName
+                )
             )
-            persist(user: user)
-            needsHandle = false
-            hasCompletedOnboarding = true
-            UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
-        } else {
-            needsHandle = true
+            storeTokens(access: response.accessToken, refresh: response.refreshToken)
+            await APIClient.shared.setTokens(access: response.accessToken, refresh: response.refreshToken)
+            persist(user: response.user)
+            isAuthenticated = true
+            needsHandle = response.needsHandle ?? response.user.handle.isEmpty
+            if !needsHandle {
+                hasCompletedOnboarding = true
+                UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
+            }
+            return true
+        } catch {
+            lastError = error.localizedDescription
+            print("Sign in with Apple API failed: \(error)")
+            return false
         }
     }
 
-    func completeHandle(_ handle: String) async {
+    /// Returns `true` when the server saved the handle.
+    @discardableResult
+    func completeHandle(_ handle: String) async -> Bool {
+        lastError = nil
         let cleaned = handle.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !cleaned.isEmpty else { return }
+        guard !cleaned.isEmpty else { return false }
 
         do {
             let user = try await APIClient.shared.updateHandle(cleaned)
@@ -115,24 +105,14 @@ final class AuthService {
             persist(user: user)
             needsHandle = false
             isAuthenticated = true
-            return
+            hasCompletedOnboarding = true
+            UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
+            return true
         } catch {
-            // Local fallback
+            lastError = error.localizedDescription
+            print("Handle update failed: \(error)")
+            return false
         }
-
-        KeychainStore.set(cleaned, forKey: KeychainStore.Keys.handle)
-        let user = User(
-            id: currentUser?.id ?? UUID(),
-            handle: cleaned,
-            appleUserId: pendingAppleUserId ?? currentUser?.appleUserId,
-            gemsUnearthed: currentUser?.gemsUnearthed ?? 0,
-            firstFindsCount: currentUser?.firstFindsCount ?? 0,
-            prospectorLevel: currentUser?.prospectorLevel ?? .digger,
-            finds: currentUser?.finds ?? []
-        )
-        persist(user: user)
-        needsHandle = false
-        isAuthenticated = true
     }
 
     /// Sync availability check; falls back to local regex-only when API fails.
@@ -172,15 +152,8 @@ final class AuthService {
                     UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
                 }
             } catch {
-                let user = User.mock
-                storeTokens(access: "debug.mock", refresh: "debug.refresh")
-                KeychainStore.set(user.handle, forKey: KeychainStore.Keys.handle)
-                persist(user: user)
-                isAuthenticated = true
-                needsHandle = false
-                hasCompletedOnboarding = true
-                UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
-                await APIClient.shared.setTokens(access: "debug.mock", refresh: "debug.refresh")
+                lastError = error.localizedDescription
+                print("Dev auth failed: \(error)")
             }
         }
     }

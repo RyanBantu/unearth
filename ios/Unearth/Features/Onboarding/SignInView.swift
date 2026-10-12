@@ -5,6 +5,8 @@ struct SignInView: View {
     var auth: AuthService
     var onSignedIn: () -> Void
 
+    @State private var errorMessage: String?
+
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
@@ -26,6 +28,14 @@ struct SignInView: View {
             Spacer()
 
             VStack(spacing: 12) {
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(UnearthFont.bodySmall())
+                        .foregroundStyle(UnearthColor.amber)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 8)
+                }
+
                 SignInWithAppleButton(.signIn) { request in
                     request.requestedScopes = [.fullName, .email]
                 } onCompletion: { result in
@@ -33,12 +43,17 @@ struct SignInView: View {
                         switch result {
                         case .success(let authorization):
                             if let credential = authorization.credential as? ASAuthorizationAppleIDCredential {
-                                await auth.handleAppleSignIn(credential: credential)
-                                onSignedIn()
+                                let ok = await auth.handleAppleSignIn(credential: credential)
+                                if ok {
+                                    errorMessage = nil
+                                    onSignedIn()
+                                } else {
+                                    errorMessage = auth.lastError
+                                        ?? "Sign in failed. Check Render APPLE_* env vars."
+                                }
                             }
                         case .failure(let error):
-                            // Surface via toast when wired; keep console for now.
-                            print("Sign in with Apple failed: \(error.localizedDescription)")
+                            errorMessage = error.localizedDescription
                         }
                     }
                 }
@@ -49,7 +64,15 @@ struct SignInView: View {
                 #if DEBUG
                 Button("Continue with mock (DEBUG)") {
                     auth.signInWithMockUser()
-                    onSignedIn()
+                    // Give the async mock auth a moment; RootView observes auth state.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                        if auth.isAuthenticated {
+                            onSignedIn()
+                        } else {
+                            errorMessage = auth.lastError
+                                ?? "Mock auth failed. Set ALLOW_DEV_AUTH=true on Render."
+                        }
+                    }
                 }
                 .font(UnearthFont.label())
                 .foregroundStyle(UnearthColor.inkSecondary)

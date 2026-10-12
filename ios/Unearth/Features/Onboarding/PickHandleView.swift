@@ -8,6 +8,7 @@ struct PickHandleView: View {
     @State private var availability: Bool?
     @State private var isChecking = false
     @State private var checkTask: Task<Void, Never>?
+    @State private var errorMessage: String?
 
     private var cleaned: String {
         handle.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -96,12 +97,22 @@ struct PickHandleView: View {
                 }
             }
 
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(UnearthFont.bodySmall())
+                    .foregroundStyle(UnearthColor.amber)
+            }
+
             Spacer()
 
             PrimaryButton(title: "Continue", isEnabled: isValid) {
                 Task {
-                    await auth.completeHandle(cleaned)
-                    onContinue()
+                    let ok = await auth.completeHandle(cleaned)
+                    if ok {
+                        onContinue()
+                    } else {
+                        errorMessage = auth.lastError ?? "Could not save handle"
+                    }
                 }
             }
         }
