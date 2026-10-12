@@ -153,8 +153,13 @@ actor APIClient {
         return try await request(path: path, method: "PUT", bodyData: data)
     }
 
-    func putEmpty<T: Decodable>(_ path: String) async throws -> T {
-        try await request(path: path, method: "PUT", bodyData: nil)
+    func putEmpty(_ path: String) async throws {
+        let _: EmptyResponse = try await request(
+            path: path,
+            method: "PUT",
+            bodyData: nil,
+            allowEmptyBody: true
+        )
     }
 
     func delete<T: Decodable>(_ path: String) async throws -> T {
@@ -271,7 +276,7 @@ actor APIClient {
     }
 
     func addToStash(gemId: UUID) async throws {
-        let _: EmptyResponse = try await putEmpty("/stash/\(gemId.uuidString)")
+        try await putEmpty("/stash/\(gemId.uuidString)")
     }
 
     func removeFromStash(gemId: UUID) async throws {

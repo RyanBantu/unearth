@@ -25,20 +25,18 @@ enum GemStatus: String, Codable, Hashable {
         return .uncut
     }
 
-    /// Badges to show: Rare can appear alongside Uncut/Polished;
-    /// Mined out replaces Rare when findCount >= 25.
+    /// Badges: Uncut/Polished from find count; Rare when findCount < 10;
+    /// Mined out when findCount >= 25 (replaces Rare).
     static func badges(for findCount: Int) -> [GemStatus] {
-        if findCount >= 25 {
-            return [.minedOut]
-        }
-
         var badges: [GemStatus] = []
         if findCount >= 3 {
             badges.append(.polished)
         } else {
             badges.append(.uncut)
         }
-        if findCount >= 10 {
+        if findCount >= 25 {
+            badges.append(.minedOut)
+        } else if findCount < 10 {
             badges.append(.rare)
         }
         return badges

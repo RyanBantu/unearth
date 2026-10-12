@@ -3,19 +3,20 @@ import MapKit
 import SwiftUI
 
 struct GemDetailView: View {
-    let gem: Gem
+    @State private var gem: Gem
     var userLocation: CLLocation? = nil
     var onClose: (() -> Void)? = nil
     var onFoundItToo: ((Gem) -> Void)? = nil
     var onStashChanged: (() -> Void)? = nil
+    var onGemUpdated: ((Gem) -> Void)? = nil
 
-    @State private var isStashed: Bool
     @State private var lookAroundScene: MKLookAroundScene?
     @State private var showLookAround = false
     @State private var toastMessage: String?
     @State private var hasLookAround = false
     @State private var didCheckLookAround = false
     @State private var showReportConfirm = false
+    @State private var isRefreshing = false
 
     private let firstFindBodyColor = Color(hex: 0x2A3530)
 
@@ -24,14 +25,15 @@ struct GemDetailView: View {
         userLocation: CLLocation? = nil,
         onClose: (() -> Void)? = nil,
         onFoundItToo: ((Gem) -> Void)? = nil,
-        onStashChanged: (() -> Void)? = nil
+        onStashChanged: (() -> Void)? = nil,
+        onGemUpdated: ((Gem) -> Void)? = nil
     ) {
-        self.gem = gem
+        _gem = State(initialValue: gem)
         self.userLocation = userLocation
         self.onClose = onClose
         self.onFoundItToo = onFoundItToo
         self.onStashChanged = onStashChanged
-        _isStashed = State(initialValue: gem.isStashed)
+        self.onGemUpdated = onGemUpdated
     }
 
     var body: some View {
@@ -41,7 +43,7 @@ struct GemDetailView: View {
                     headerMap
                     content
                         .padding(20)
-                        .padding(.bottom, 100)
+                        .padding(.bottom, 120)
                 }
             }
             .ignoresSafeArea(edges: .top)
@@ -89,7 +91,7 @@ struct GemDetailView: View {
                     onClose?()
                 }
                 Spacer()
-                RoundIconButton(systemName: isStashed ? "bookmark.fill" : "bookmark") {
+                RoundIconButton(systemName: gem.isStashed ? "bookmark.fill" : "bookmark") {
                     Task { await toggleStash() }
                 }
             }
@@ -117,7 +119,6 @@ struct GemDetailView: View {
         if #available(iOS 18.0, *) {
             return .standard(emphasis: .muted, pointsOfInterest: .excludingAll)
         } else {
-            // iOS 17: closest available muted-like style.
             return .standard(elevation: .flat, pointsOfInterest: .excludingAll)
         }
     }
@@ -128,9 +129,8 @@ struct GemDetailView: View {
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: "binoculars")
-                    .font(.system(size: 14, weight: .semibold))
                 Text("Look Around")
-                    .font(.custom("DMSans-SemiBold", size: 14, relativeTo: .subheadline))
+                    .font(UnearthFont.label(14))
             }
             .foregroundStyle(UnearthColor.ink)
             .padding(.horizontal, 14)
@@ -147,6 +147,7 @@ struct GemDetailView: View {
     private var content: some View {
         VStack(alignment: .leading, spacing: 16) {
             badgeRow
+
             Text(gem.name)
                 .font(UnearthFont.gemTitle())
                 .foregroundStyle(UnearthColor.ink)
@@ -171,7 +172,7 @@ struct GemDetailView: View {
                 tagChips
             }
 
-            if gem.otherFinds.count >= 1, gem.finds.count > 1 {
+            if gem.finds.count > 1 {
                 otherFindsSection
             }
         }
@@ -182,6 +183,10 @@ struct GemDetailView: View {
             Badge(text: gem.category.displayName, variant: .neutral)
             ForEach(gem.statusBadges, id: \.self) { status in
                 Badge(text: status.shortBadgeText, variant: .from(status: status))
+            }
+            if isRefreshing {
+                ProgressView()
+                    .scaleEffect(0.8)
             }
         }
     }
@@ -221,16 +226,31 @@ struct GemDetailView: View {
 
     private var likedDislikedRow: some View {
         HStack(alignment: .top, spacing: 10) {
-            opinionCard(title: "Liked", items: gem.liked)
-            opinionCard(title: "Didn't like", items: gem.disliked)
+            opinionCard(
+                title: "Liked",
+                icon: "checkmark",
+                tint: UnearthColor.green,
+                items: gem.liked
+            )
+            opinionCard(
+                title: "Didn't like",
+                icon: "xmark",
+                tint: UnearthColor.amber,
+                items: gem.disliked
+            )
         }
     }
 
-    private func opinionCard(title: String, items: [String]) -> some View {
+    private func opinionCard(title: String, icon: String, tint: Color, items: [String]) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(UnearthFont.label())
-                .foregroundStyle(UnearthColor.ink)
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .semibold))
+                Text(title)
+                    .font(UnearthFont.label())
+            }
+            .foregroundStyle(tint)
+
             if items.isEmpty {
                 Text("—")
                     .font(UnearthFont.bodySmall())
@@ -240,6 +260,7 @@ struct GemDetailView: View {
                     Text(item)
                         .font(UnearthFont.bodySmall())
                         .foregroundStyle(UnearthColor.inkSecondary)
+                        .lineSpacing(1.4)
                 }
             }
         }
@@ -262,19 +283,22 @@ struct GemDetailView: View {
     }
 
     private var otherFindsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             Text("Other finds")
                 .font(UnearthFont.cardTitle())
                 .foregroundStyle(UnearthColor.ink)
+                .padding(.bottom, 12)
 
             ForEach(gem.otherFinds) { find in
                 VStack(alignment: .leading, spacing: 6) {
-                    HStack(spacing: 8) {
-                        Avatar(handle: find.handle, size: 28)
+                    HStack {
                         Text("@\(find.handle)")
                             .font(UnearthFont.label())
                             .foregroundStyle(UnearthColor.ink)
                         Spacer()
+                        Text(find.createdAt, style: .date)
+                            .font(UnearthFont.bodySmall())
+                            .foregroundStyle(UnearthColor.inkSecondary)
                     }
                     if let note = find.note {
                         Text(note)
@@ -282,14 +306,20 @@ struct GemDetailView: View {
                             .foregroundStyle(UnearthColor.inkSecondary)
                             .bodyLineSpacing()
                     }
+                    if let liked = find.likedText, !liked.isEmpty {
+                        Text("Liked: \(liked)")
+                            .font(UnearthFont.bodySmall())
+                            .foregroundStyle(UnearthColor.green)
+                    }
+                    if let disliked = find.dislikedText, !disliked.isEmpty {
+                        Text("Didn't like: \(disliked)")
+                            .font(UnearthFont.bodySmall())
+                            .foregroundStyle(UnearthColor.amber)
+                    }
                 }
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(UnearthColor.surface)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(UnearthColor.border, lineWidth: 1)
+                .padding(.vertical, 12)
+                if find.id != gem.otherFinds.last?.id {
+                    UnearthColor.divider.frame(height: 1)
                 }
             }
         }
@@ -352,17 +382,34 @@ struct GemDetailView: View {
         }
     }
 
-    private func toggleStash() async {
+    // MARK: - Actions
+
+    /// Reload from `GET /gems/:id` so badges / myFindId stay in sync.
+    func refreshFromAPI() async {
+        isRefreshing = true
+        defer { isRefreshing = false }
         do {
-            if isStashed {
-                try await APIClient.shared.removeFromStash(gemId: gem.id)
-                isStashed = false
+            let fresh = try await APIClient.shared.gem(id: gem.id)
+            gem = fresh
+            onGemUpdated?(fresh)
+        } catch {
+            toastMessage = error.localizedDescription
+        }
+    }
+
+    private func toggleStash() async {
+        let gemId = gem.id
+        do {
+            if gem.isStashed {
+                try await APIClient.shared.removeFromStash(gemId: gemId)
+                gem.isStashed = false
                 toastMessage = "Removed from Stash"
             } else {
-                try await APIClient.shared.addToStash(gemId: gem.id)
-                isStashed = true
+                try await APIClient.shared.addToStash(gemId: gemId)
+                gem.isStashed = true
                 toastMessage = "Saved to Stash"
             }
+            onGemUpdated?(gem)
             onStashChanged?()
         } catch {
             toastMessage = error.localizedDescription
@@ -397,7 +444,7 @@ struct GemDetailView: View {
     }
 }
 
-// MARK: - Simple wrapping layout for tag chips
+// MARK: - Flow layout
 
 private struct FlowLayout: Layout {
     var spacing: CGFloat = 6
@@ -408,37 +455,32 @@ private struct FlowLayout: Layout {
         var y: CGFloat = 0
         var rowHeight: CGFloat = 0
         var height: CGFloat = 0
-
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
+        for sub in subviews {
+            let size = sub.sizeThatFits(.unspecified)
             if x + size.width > maxWidth, x > 0 {
                 x = 0
                 y += rowHeight + spacing
                 rowHeight = 0
             }
-            rowHeight = max(rowHeight, size.height)
             x += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
             height = y + rowHeight
         }
-        return CGSize(width: maxWidth, height: height)
+        return CGSize(width: maxWidth.isFinite ? maxWidth : x, height: height)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         var x = bounds.minX
         var y = bounds.minY
         var rowHeight: CGFloat = 0
-
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
+        for sub in subviews {
+            let size = sub.sizeThatFits(.unspecified)
             if x + size.width > bounds.maxX, x > bounds.minX {
                 x = bounds.minX
                 y += rowHeight + spacing
                 rowHeight = 0
             }
-            subview.place(
-                at: CGPoint(x: x, y: y),
-                proposal: ProposedViewSize(size)
-            )
+            sub.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
             x += size.width + spacing
             rowHeight = max(rowHeight, size.height)
         }
@@ -446,11 +488,7 @@ private struct FlowLayout: Layout {
 }
 
 #Preview("GemDetailView") {
-    GemDetailView(
-        gem: Gem.mockGems[0],
-        userLocation: CLLocation(latitude: 12.9716, longitude: 77.5946),
-        onClose: {}
-    )
+    GemDetailView(gem: Gem.mockGems[0], onClose: {})
 }
 
 #Preview("GemDetailView · Rare + Polished") {

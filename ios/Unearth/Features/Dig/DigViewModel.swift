@@ -64,11 +64,18 @@ final class DigViewModel {
         // Refresh from API so find_count / status are authoritative.
         Task {
             if let fresh = try? await APIClient.shared.gem(id: gem.id) {
-                if let idx = gems.firstIndex(where: { $0.id == fresh.id }) {
-                    gems[idx] = fresh
-                }
+                applyUpdatedGem(fresh)
                 selectedGem = fresh
             }
+        }
+    }
+
+    func applyUpdatedGem(_ gem: Gem) {
+        if let idx = gems.firstIndex(where: { $0.id == gem.id }) {
+            gems[idx] = gem
+        }
+        if selectedGem?.id == gem.id {
+            selectedGem = gem
         }
     }
 

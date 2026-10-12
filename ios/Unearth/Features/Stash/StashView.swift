@@ -3,6 +3,7 @@ import SwiftUI
 struct StashView: View {
     var gems: [Gem] = []
     var onOpenGem: (Gem) -> Void = { _ in }
+    var onRefresh: (() async -> Void)? = nil
 
     var body: some View {
         NavigationStack {
@@ -28,6 +29,9 @@ struct StashView: View {
                         }
                         .padding(.top, 8)
                         .padding(.bottom, 24)
+                    }
+                    .refreshable {
+                        await onRefresh?()
                     }
                 }
             }

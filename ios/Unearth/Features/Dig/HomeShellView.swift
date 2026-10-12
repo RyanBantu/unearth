@@ -9,11 +9,13 @@ struct HomeShellView: View {
     @State private var digViewModel = DigViewModel()
     @State private var placeSearch = PlaceSearchService()
     @State private var showUnearth = false
-    @State private var presentedGem: Gem?
+    @State private var presentedGem: PresentedGem?
     @State private var linkedGemForFind: Gem?
+    @State private var reopenGemAfterFind: UUID?
     @State private var toastMessage: String?
     @State private var stashGems: [Gem] = []
     @State private var activityEvents: [ActivityEvent] = []
+    @State private var stashReloadToken = 0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -22,7 +24,12 @@ struct HomeShellView: View {
                 case .dig:
                     digTab
                 case .stash:
-                    StashView(gems: stashGems, onOpenGem: { presentedGem = $0 })
+                    StashView(
+                        gems: stashGems,
+                        onOpenGem: { presentedGem = PresentedGem(id: $0.id) },
+                        onRefresh: { await loadStash() }
+                    )
+                        .id(stashReloadToken)
                         .task { await loadStash() }
                 case .unearth:
                     digTab
@@ -52,30 +59,57 @@ struct HomeShellView: View {
                 linkedGem: linkedGemForFind,
                 onDismiss: {
                     showUnearth = false
+                    let wasAddingFind = linkedGemForFind != nil
                     linkedGemForFind = nil
+                    // If user cancelled "I found it too", reopen the gem page.
+                    if wasAddingFind, let id = reopenGemAfterFind {
+                        presentedGem = PresentedGem(id: id)
+                    }
+                    reopenGemAfterFind = nil
                 },
                 onSuccess: { message, gem in
+                    let reopenId = reopenGemAfterFind
                     showUnearth = false
                     linkedGemForFind = nil
+                    reopenGemAfterFind = nil
                     toastMessage = message
-                    selectedTab = .dig
-                    if let gem {
+
+                    if let reopenId {
+                        // Added a find — reopen gem so “You found this” + badges refresh.
+                        selectedTab = .dig
+                        presentedGem = PresentedGem(id: reopenId)
+                    } else if let gem {
+                        selectedTab = .dig
                         digViewModel.selectNewlyUnearthed(gem)
+                    }
+
+                    Task {
+                        await digViewModel.loadNearby(
+                            lat: locationService.currentLocation?.coordinate.latitude ?? gem?.latitude ?? 12.9716,
+                            lng: locationService.currentLocation?.coordinate.longitude ?? gem?.longitude ?? 77.5946
+                        )
                     }
                 }
             )
         }
-        .fullScreenCover(item: $presentedGem) { gem in
+        .fullScreenCover(item: $presentedGem) { item in
             GemDetailHost(
-                gemId: gem.id,
+                gemId: item.id,
                 userLocation: locationService.currentLocation,
                 onClose: { presentedGem = nil },
                 onFoundItToo: { foundGem in
+                    reopenGemAfterFind = foundGem.id
                     presentedGem = nil
                     linkedGemForFind = foundGem
                     showUnearth = true
                 },
-                onStashChanged: { Task { await loadStash() } }
+                onStashChanged: {
+                    stashReloadToken += 1
+                    Task { await loadStash() }
+                },
+                onGemUpdated: { updated in
+                    digViewModel.applyUpdatedGem(updated)
+                }
             )
         }
     }
@@ -85,10 +119,9 @@ struct HomeShellView: View {
             viewModel: digViewModel,
             locationService: locationService,
             placeSearch: placeSearch,
-            onOpenGem: { presentedGem = $0 }
+            onOpenGem: { presentedGem = PresentedGem(id: $0.id) }
         )
         .task {
-            // Initial load; further fetches happen on map camera settle.
             let loc = locationService.currentLocation
             let lat = loc?.coordinate.latitude ?? 12.9716
             let lng = loc?.coordinate.longitude ?? 77.5946
@@ -102,7 +135,11 @@ struct HomeShellView: View {
     private func loadStash() async {
         do {
             let response = try await APIClient.shared.stash()
-            stashGems = response.gems.map { $0.toGem() }
+            stashGems = response.gems.map {
+                var gem = $0.toGem()
+                gem.isStashed = true
+                return gem
+            }
         } catch {
             stashGems = []
         }
@@ -118,6 +155,10 @@ struct HomeShellView: View {
     }
 }
 
+private struct PresentedGem: Identifiable, Hashable {
+    let id: UUID
+}
+
 /// Loads gem detail exclusively from `GET /gems/:id`.
 private struct GemDetailHost: View {
     let gemId: UUID
@@ -125,6 +166,7 @@ private struct GemDetailHost: View {
     var onClose: () -> Void
     var onFoundItToo: (Gem) -> Void
     var onStashChanged: () -> Void
+    var onGemUpdated: (Gem) -> Void
 
     @State private var detail: Gem?
     @State private var errorMessage: String?
@@ -138,8 +180,13 @@ private struct GemDetailHost: View {
                     userLocation: userLocation,
                     onClose: onClose,
                     onFoundItToo: onFoundItToo,
-                    onStashChanged: onStashChanged
+                    onStashChanged: onStashChanged,
+                    onGemUpdated: onGemUpdated
                 )
+                .task(id: gemId) {
+                    // Refresh when reopened after “I found it too”.
+                    await reloadQuietly()
+                }
             } else if isLoading {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -176,6 +223,16 @@ private struct GemDetailHost: View {
         } catch {
             detail = nil
             errorMessage = error.localizedDescription
+        }
+    }
+
+    private func reloadQuietly() async {
+        do {
+            let fresh = try await APIClient.shared.gem(id: gemId)
+            detail = fresh
+            onGemUpdated(fresh)
+        } catch {
+            // Keep existing detail
         }
     }
 }
