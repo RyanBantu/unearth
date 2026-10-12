@@ -9,6 +9,7 @@ import { stashRoutes } from "./routes/stash.js";
 import { activityRoutes } from "./routes/activity.js";
 import { usersRoutes } from "./routes/users.js";
 import { reportsRoutes } from "./routes/reports.js";
+import { legalRoutes } from "./routes/legal.js";
 
 export async function buildApp() {
   const app = Fastify({
@@ -28,6 +29,7 @@ export async function buildApp() {
 
   app.get("/health", async () => ({ ok: true }));
 
+  await app.register(legalRoutes);
   await app.register(authRoutes);
   await app.register(meRoutes);
   await app.register(handlesRoutes);

@@ -84,10 +84,10 @@ enum ScreenStates {
     }
 }
 
-/// Canonical legal / policy URLs (GitHub docs in this repo).
+/// Canonical legal / policy URLs (hosted on the API for App Store Connect).
 enum UnearthLinks {
-    static let privacyPolicy = URL(string: "https://github.com/RyanBantu/unearth/blob/main/docs/PRIVACY.md")!
-    static let postingGuidelines = URL(string: "https://github.com/RyanBantu/unearth/blob/main/docs/POSTING_GUIDELINES.md")!
+    static let privacyPolicy = URL(string: "https://unearth-1o4a.onrender.com/privacy")!
+    static let postingGuidelines = URL(string: "https://unearth-1o4a.onrender.com/guidelines")!
 }
 
 #Preview("ScreenStates") {
