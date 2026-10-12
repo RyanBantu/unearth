@@ -20,9 +20,11 @@ targets:
         excludes:
           - "**/.DS_Store"
           - Resources/Fonts
+          - Resources/Brand
           - Assets.xcassets
     resources:
       - path: Unearth/Resources/Fonts
+      - path: Unearth/Resources/Brand
       - path: Unearth/Assets.xcassets
     settings:
       base:

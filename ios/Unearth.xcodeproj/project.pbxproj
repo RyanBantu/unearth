@@ -12,6 +12,7 @@
 		0E21EB00B31BBFB087460F2E /* ActivityEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14080EDFBF95D9D930C50F7C /* ActivityEvent.swift */; };
 		15ADDA26173E2BBFF0887064 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 076561CF35381F0E70DC1B36 /* APIModels.swift */; };
 		1DD6BC3D5D1EF783C38606A6 /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93BDF2871A86C8D3CB1C65C5 /* Badge.swift */; };
+		1EFF73EAE12CBCD4F6713693 /* UnearthLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62AC82713E081332F290E05E /* UnearthLogo.swift */; };
 		21A0E5EF51AC365E9293C1E1 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8383F9818953A916781AF4B2 /* APIClient.swift */; };
 		21D7E2CFAC7BD8E4F916209E /* GemCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A65CAB0F4DD10BA2B5D6131 /* GemCard.swift */; };
 		22A748D8992E1A9CECD9C279 /* Gem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F18A4593545C190882F28D97 /* Gem.swift */; };
@@ -75,6 +76,7 @@
 		42ABBBE511D9BD7CD6915092 /* DigViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DigViewModel.swift; sourceTree = "<group>"; };
 		47B28F5915F1D6E26A40BBD2 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		4C7DD063BCD904E797178190 /* StashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StashView.swift; sourceTree = "<group>"; };
+		62AC82713E081332F290E05E /* UnearthLogo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnearthLogo.swift; sourceTree = "<group>"; };
 		655726F68DE05DFC7272F997 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		6B5B3665C5E331619BBFAE73 /* MatchCandidate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchCandidate.swift; sourceTree = "<group>"; };
 		721B41F36D197D2E5296421D /* OutlineButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlineButton.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				03B98493B09F45DCED59FBDD /* Colors.swift */,
 				80C70C906423387F6C40D177 /* Shadows.swift */,
 				9FA4D605A9C263CF249AD91D /* Typography.swift */,
+				62AC82713E081332F290E05E /* UnearthLogo.swift */,
 			);
 			path = Design;
 			sourceTree = "<group>";
@@ -377,6 +380,7 @@
 				A4F4BE5CC4008A3A08939C29 /* Toast.swift in Sources */,
 				B19E1366A9FCB26F9D637F9E /* Typography.swift in Sources */,
 				7DBFBF457D29577EA0408B1D /* UnearthApp.swift in Sources */,
+				1EFF73EAE12CBCD4F6713693 /* UnearthLogo.swift in Sources */,
 				B4B7C253EBB22E05C02F0160 /* UnearthView.swift in Sources */,
 				396CBEC8CD42C09F735858BA /* UnearthViewModel.swift in Sources */,
 				0D05EEC649C24515B797BF69 /* User.swift in Sources */,
