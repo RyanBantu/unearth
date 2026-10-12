@@ -154,17 +154,35 @@ final class AuthService {
         UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
     }
 
-    /// DEBUG helper to jump into the main app with mock auth.
+    /// DEBUG helper — prefers live `/auth/dev` (when ALLOW_DEV_AUTH=true), else local mock.
     func signInWithMockUser() {
-        let user = User.mock
-        storeTokens(access: "debug.mock", refresh: "debug.refresh")
-        KeychainStore.set(user.handle, forKey: KeychainStore.Keys.handle)
-        persist(user: user)
-        isAuthenticated = true
-        needsHandle = false
-        hasCompletedOnboarding = true
-        UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
-        Task { await APIClient.shared.setTokens(access: "debug.mock", refresh: "debug.refresh") }
+        Task {
+            do {
+                let response = try await APIClient.shared.authDev(handle: "devuser")
+                storeTokens(access: response.accessToken, refresh: response.refreshToken)
+                await APIClient.shared.setTokens(
+                    access: response.accessToken,
+                    refresh: response.refreshToken
+                )
+                persist(user: response.user)
+                isAuthenticated = true
+                needsHandle = response.needsHandle ?? response.user.handle.isEmpty
+                if !needsHandle {
+                    hasCompletedOnboarding = true
+                    UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
+                }
+            } catch {
+                let user = User.mock
+                storeTokens(access: "debug.mock", refresh: "debug.refresh")
+                KeychainStore.set(user.handle, forKey: KeychainStore.Keys.handle)
+                persist(user: user)
+                isAuthenticated = true
+                needsHandle = false
+                hasCompletedOnboarding = true
+                UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
+                await APIClient.shared.setTokens(access: "debug.mock", refresh: "debug.refresh")
+            }
+        }
     }
 
     func signOut() {

@@ -12,6 +12,8 @@ final class DigViewModel {
     var searchText: String = ""
     var showSearchSuggestions = false
     var showNearbyList = false
+    var isLoadingNearby = false
+    var loadError: String?
     var cameraPosition: MapCameraPosition = .region(
         MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: 12.9716, longitude: 77.5946),
@@ -41,6 +43,13 @@ final class DigViewModel {
                 span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
             )
         )
+    }
+
+    func selectNewlyUnearthed(_ gem: Gem) {
+        if !gems.contains(where: { $0.id == gem.id }) {
+            gems.insert(gem, at: 0)
+        }
+        select(gem)
     }
 
     func clearSelection() {
@@ -78,32 +87,47 @@ final class DigViewModel {
         }
     }
 
-    /// Loads nearby gems from the API when authenticated; falls back to mocks on failure.
+    /// Selected pin, otherwise nearest gem for the bottom sheet.
+    func sheetGem(userLocation: CLLocation?) -> Gem? {
+        if let selectedGem, filteredGems.contains(where: { $0.id == selectedGem.id }) {
+            return selectedGem
+        }
+        return nearestGem(from: userLocation)
+    }
+
+    func nearbyGemsSorted(from location: CLLocation?) -> [Gem] {
+        filteredGems.sorted { lhs, rhs in
+            let left = lhs.distanceMeters(from: location) ?? .greatestFiniteMagnitude
+            let right = rhs.distanceMeters(from: location) ?? .greatestFiniteMagnitude
+            return left < right
+        }
+    }
+
     func loadNearby(lat: Double, lng: Double, radiusMeters: Int = 5_000) async {
-        // TODO: map GemsNearbyResponse → Gem and replace `gems` once auth is live end-to-end
+        isLoadingNearby = true
+        loadError = nil
+        defer { isLoadingNearby = false }
+
         do {
-            let _: GemsNearbyResponse = try await APIClient.shared.gemsNearby(
+            let response = try await APIClient.shared.gemsNearby(
                 lat: lat,
                 lng: lng,
                 radiusM: radiusMeters,
                 category: selectedCategory?.rawValue
             )
+            let mapped = response.gems.map { $0.toGem() }
+            gems = mapped
+            if selectedGem == nil, let nearest = nearestGem(
+                from: CLLocation(latitude: lat, longitude: lng)
+            ) {
+                selectedGem = nearest
+            } else if let selected = selectedGem,
+                      let refreshed = mapped.first(where: { $0.id == selected.id }) {
+                selectedGem = refreshed
+            }
         } catch {
-            // Keep mock gems for previews / offline DEBUG.
-        }
-    }
-
-    func sheetGem(userLocation: CLLocation?) -> Gem? {
-        if let selectedGem { return selectedGem }
-        return nearestGem(from: userLocation)
-    }
-
-    func nearbyGemsSorted(from location: CLLocation?) -> [Gem] {
-        let pool = filteredGems
-        guard let location else { return pool }
-        return pool.sorted {
-            ($0.distanceMeters(from: location) ?? .greatestFiniteMagnitude)
-                < ($1.distanceMeters(from: location) ?? .greatestFiniteMagnitude)
+            loadError = error.localizedDescription
+            // Keep existing / mock gems when offline or unauthenticated.
         }
     }
 }

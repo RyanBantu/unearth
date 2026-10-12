@@ -7,6 +7,7 @@ struct GemDetailView: View {
     var userLocation: CLLocation? = nil
     var onClose: (() -> Void)? = nil
     var onFoundItToo: ((Gem) -> Void)? = nil
+    var onStashChanged: (() -> Void)? = nil
 
     @State private var isStashed: Bool
     @State private var lookAroundScene: MKLookAroundScene?
@@ -22,12 +23,14 @@ struct GemDetailView: View {
         gem: Gem,
         userLocation: CLLocation? = nil,
         onClose: (() -> Void)? = nil,
-        onFoundItToo: ((Gem) -> Void)? = nil
+        onFoundItToo: ((Gem) -> Void)? = nil,
+        onStashChanged: (() -> Void)? = nil
     ) {
         self.gem = gem
         self.userLocation = userLocation
         self.onClose = onClose
         self.onFoundItToo = onFoundItToo
+        self.onStashChanged = onStashChanged
         _isStashed = State(initialValue: gem.isStashed)
     }
 
@@ -87,8 +90,7 @@ struct GemDetailView: View {
                 }
                 Spacer()
                 RoundIconButton(systemName: isStashed ? "bookmark.fill" : "bookmark") {
-                    isStashed.toggle()
-                    toastMessage = isStashed ? "Saved to Stash" : "Removed from Stash"
+                    Task { await toggleStash() }
                 }
             }
             .padding(.horizontal, 16)
@@ -344,10 +346,37 @@ struct GemDetailView: View {
         .background(UnearthColor.surface)
         .confirmationDialog("Report this gem?", isPresented: $showReportConfirm, titleVisibility: .visible) {
             Button("Report", role: .destructive) {
-                // TODO: POST /reports
-                toastMessage = "Thanks — we received your report"
+                Task { await submitReport() }
             }
             Button("Cancel", role: .cancel) {}
+        }
+    }
+
+    private func toggleStash() async {
+        do {
+            if isStashed {
+                try await APIClient.shared.removeFromStash(gemId: gem.id)
+                isStashed = false
+                toastMessage = "Removed from Stash"
+            } else {
+                try await APIClient.shared.addToStash(gemId: gem.id)
+                isStashed = true
+                toastMessage = "Saved to Stash"
+            }
+            onStashChanged?()
+        } catch {
+            toastMessage = error.localizedDescription
+        }
+    }
+
+    private func submitReport() async {
+        do {
+            try await APIClient.shared.report(
+                ReportBody(gemId: gem.id, findId: nil, reason: "user_report")
+            )
+            toastMessage = "Thanks — we received your report"
+        } catch {
+            toastMessage = error.localizedDescription
         }
     }
 

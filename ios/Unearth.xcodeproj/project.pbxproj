@@ -10,6 +10,7 @@
 		0013A0176601E7009DACB4A5 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E53DB82A53CCF23E9A9E991 /* SignInView.swift */; };
 		0D05EEC649C24515B797BF69 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACF63465BD82FB1FE5F4E22 /* User.swift */; };
 		0E21EB00B31BBFB087460F2E /* ActivityEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14080EDFBF95D9D930C50F7C /* ActivityEvent.swift */; };
+		15ADDA26173E2BBFF0887064 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 076561CF35381F0E70DC1B36 /* APIModels.swift */; };
 		1DD6BC3D5D1EF783C38606A6 /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93BDF2871A86C8D3CB1C65C5 /* Badge.swift */; };
 		21A0E5EF51AC365E9293C1E1 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8383F9818953A916781AF4B2 /* APIClient.swift */; };
 		21D7E2CFAC7BD8E4F916209E /* GemCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A65CAB0F4DD10BA2B5D6131 /* GemCard.swift */; };
@@ -55,6 +56,7 @@
 		0083A213A793C6B0A592BA8D /* Unearth.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Unearth.entitlements; sourceTree = "<group>"; };
 		00A048782079ECEA307A04FF /* GemPinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GemPinView.swift; sourceTree = "<group>"; };
 		03B98493B09F45DCED59FBDD /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		076561CF35381F0E70DC1B36 /* APIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIModels.swift; sourceTree = "<group>"; };
 		0ADBDEBE90DEA77022655637 /* Unearth.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Unearth.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13D39CA304D48EF10F2E4D68 /* Avatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Avatar.swift; sourceTree = "<group>"; };
 		14080EDFBF95D9D930C50F7C /* ActivityEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityEvent.swift; sourceTree = "<group>"; };
@@ -135,6 +137,7 @@
 			isa = PBXGroup;
 			children = (
 				14080EDFBF95D9D930C50F7C /* ActivityEvent.swift */,
+				076561CF35381F0E70DC1B36 /* APIModels.swift */,
 				655726F68DE05DFC7272F997 /* Category.swift */,
 				1FBE0FEEC407F810EF501B12 /* Find.swift */,
 				F18A4593545C190882F28D97 /* Gem.swift */,
@@ -335,6 +338,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				21A0E5EF51AC365E9293C1E1 /* APIClient.swift in Sources */,
+				15ADDA26173E2BBFF0887064 /* APIModels.swift in Sources */,
 				0E21EB00B31BBFB087460F2E /* ActivityEvent.swift in Sources */,
 				FBDFA7A1A45C3D5145AF72BA /* ActivityView.swift in Sources */,
 				8A7BABF58131A446EBE83A8C /* AuthService.swift in Sources */,

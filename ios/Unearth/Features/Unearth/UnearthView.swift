@@ -5,7 +5,7 @@ struct UnearthView: View {
     var locationService: LocationService? = nil
     var linkedGem: Gem? = nil
     var onDismiss: (() -> Void)? = nil
-    var onSuccess: ((String) -> Void)? = nil
+    var onSuccess: ((String, Gem?) -> Void)? = nil
 
     @State private var viewModel: UnearthViewModel
     @FocusState private var focusedField: FieldFocus?
@@ -18,7 +18,7 @@ struct UnearthView: View {
         locationService: LocationService? = nil,
         linkedGem: Gem? = nil,
         onDismiss: (() -> Void)? = nil,
-        onSuccess: ((String) -> Void)? = nil
+        onSuccess: ((String, Gem?) -> Void)? = nil
     ) {
         self.locationService = locationService
         self.linkedGem = linkedGem
@@ -430,7 +430,7 @@ struct UnearthView: View {
             ) {
                 Task {
                     if let message = await viewModel.submit() {
-                        onSuccess?(message)
+                        onSuccess?(message, viewModel.lastSubmittedGem)
                         try? await Task.sleep(nanoseconds: 600_000_000)
                         onDismiss?()
                     }

@@ -159,6 +159,63 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     await revokeRefreshToken(parsed.data.refreshToken);
     return reply.code(204).send();
   });
+
+  /**
+   * Temporary DEBUG auth for simulator / staging when Apple SIWA isn't configured.
+   * Enabled only when ALLOW_DEV_AUTH=true.
+   */
+  app.post("/auth/dev", async (request, reply) => {
+    if (process.env.ALLOW_DEV_AUTH !== "true") {
+      return reply.code(404).send({ error: "Not found" });
+    }
+
+    const body = z
+      .object({
+        handle: z
+          .string()
+          .regex(/^[a-z0-9_]{3,20}$/)
+          .optional(),
+      })
+      .safeParse(request.body ?? {});
+    if (!body.success) {
+      return reply.code(400).send({ error: "Invalid body", details: body.error.flatten() });
+    }
+
+    const appleSub = `dev:${body.data.handle ?? "mock"}`;
+    const existing = await sql<UserRow[]>`
+      select id, apple_sub, email, display_name, handle,
+             apple_refresh_token_enc, created_at
+      from users
+      where apple_sub = ${appleSub}
+      limit 1
+    `;
+
+    let user: UserRow;
+    if (existing[0]) {
+      user = existing[0];
+    } else {
+      const inserted = await sql<UserRow[]>`
+        insert into users (apple_sub, email, display_name, handle)
+        values (
+          ${appleSub},
+          ${null},
+          ${"Dev User"},
+          ${body.data.handle ?? "devuser"}
+        )
+        returning id, apple_sub, email, display_name, handle,
+                  apple_refresh_token_enc, created_at
+      `;
+      user = inserted[0]!;
+    }
+
+    const tokens = await issueTokenPair(user.id);
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      user: serializeUser(user),
+      needsHandle: !user.handle,
+    };
+  });
 }
 
 /** Used by DELETE /me — revoke Apple + wipe tokens before user delete. */

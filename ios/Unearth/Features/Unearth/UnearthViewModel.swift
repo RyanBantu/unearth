@@ -222,34 +222,33 @@ final class UnearthViewModel {
         }
     }
 
+    /// Gem produced by the last successful submit (for Dig selection).
+    var lastSubmittedGem: Gem?
+
     private func queryMatch(
         name: String,
         coordinate: CLLocationCoordinate2D,
         category: Category?
     ) async {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmed.count >= 2 else {
+        guard trimmed.count >= 2, let category else {
             matchCandidates = []
             return
         }
 
-        // TODO: call GET /gems/match
-        // Mock: show candidates when name overlaps a mock gem
-        let lower = trimmed.lowercased()
-        let mocks = MatchCandidate.mocks.filter { candidate in
-            candidate.name.lowercased().contains(lower)
-                || lower.contains(candidate.name.lowercased().prefix(5))
+        do {
+            let response = try await APIClient.shared.gemsMatch(
+                lat: coordinate.latitude,
+                lng: coordinate.longitude,
+                name: trimmed,
+                category: category.rawValue,
+                applePlaceId: applePlaceId
+            )
+            matchCandidates = response.candidates.map { $0.toMatchCandidate() }
+            dismissedCandidateIds = []
+        } catch {
+            // Keep current candidates on transient failures.
         }
-        if mocks.isEmpty, lower.count >= 4 {
-            // Demo banner for any longer name so the UI can be exercised
-            matchCandidates = [MatchCandidate.mocks[0]]
-        } else {
-            matchCandidates = mocks
-        }
-        dismissedCandidateIds = []
-        _ = coordinate
-        _ = category
-        _ = applePlaceId
     }
 
     @discardableResult
@@ -262,36 +261,59 @@ final class UnearthViewModel {
         let likedText = liked.trimmingCharacters(in: .whitespacesAndNewlines)
         let dislikedText = disliked.trimmingCharacters(in: .whitespacesAndNewlines)
         let maps = googleMapsURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        let desc = description.trimmingCharacters(in: .whitespacesAndNewlines)
 
         if let gem = linkedGem {
-            // TODO: POST /gems/:id/finds
-            _ = CreateFindBody(
-                description: description.trimmingCharacters(in: .whitespacesAndNewlines),
-                liked: likedText.isEmpty ? nil : likedText,
-                disliked: dislikedText.isEmpty ? nil : dislikedText,
-                tags: tags
-            )
-            let message = "Added your find"
-            toastMessage = message
-            return message
+            do {
+                _ = try await APIClient.shared.createFind(
+                    gemId: gem.id,
+                    body: CreateFindBody(
+                        description: desc,
+                        liked: likedText.isEmpty ? nil : likedText,
+                        disliked: dislikedText.isEmpty ? nil : dislikedText,
+                        tags: tags
+                    )
+                )
+                lastSubmittedGem = gem
+                let message = "Added your find"
+                toastMessage = message
+                return message
+            } catch {
+                toastMessage = error.localizedDescription
+                return nil
+            }
         }
 
-        // TODO: POST /gems
-        _ = CreateGemBody(
+        let body = CreateGemBody(
             name: name.trimmingCharacters(in: .whitespacesAndNewlines),
             category: (category ?? .other).rawValue,
             lat: pinCoordinate.latitude,
             lng: pinCoordinate.longitude,
-            description: description.trimmingCharacters(in: .whitespacesAndNewlines),
+            description: desc,
             liked: likedText.isEmpty ? nil : likedText,
             disliked: dislikedText.isEmpty ? nil : dislikedText,
             tags: tags,
             applePlaceId: applePlaceId,
-            googleMapsUrl: maps.isEmpty ? nil : maps
+            googleMapsUrl: maps.isEmpty ? nil : maps,
+            address: nil,
+            confirmedNew: dismissedCandidateIds.isEmpty ? nil : true
         )
-        let message = "Gem unearthed"
-        toastMessage = message
-        return message
+
+        do {
+            let created = try await APIClient.shared.createGem(body)
+            lastSubmittedGem = created
+            let message = "Gem unearthed"
+            toastMessage = message
+            return message
+        } catch APIError.conflict(let candidates) {
+            matchCandidates = candidates
+            dismissedCandidateIds = []
+            toastMessage = "Is this the same place?"
+            return nil
+        } catch {
+            toastMessage = error.localizedDescription
+            return nil
+        }
     }
 
     static func isValidGoogleMapsURL(_ string: String) -> Bool {

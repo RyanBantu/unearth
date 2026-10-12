@@ -12,6 +12,9 @@ struct Find: Identifiable, Hashable, Codable {
     var liked: [String]
     var disliked: [String]
     var tags: [String]
+    /// Raw API strings (server stores a single optional string per find).
+    var likedText: String? = nil
+    var dislikedText: String? = nil
 }
 
 extension Find {

@@ -4,6 +4,7 @@ enum APIError: Error, LocalizedError {
     case invalidURL
     case unauthorized
     case server(Int)
+    case conflict([MatchCandidate])
     case decoding
     case network(Error)
 
@@ -12,6 +13,7 @@ enum APIError: Error, LocalizedError {
         case .invalidURL: return "Invalid URL"
         case .unauthorized: return "Unauthorized"
         case .server(let code): return "Server error (\(code))"
+        case .conflict: return "Possible duplicate gem"
         case .decoding: return "Failed to decode response"
         case .network(let error): return error.localizedDescription
         }
@@ -65,6 +67,8 @@ struct CreateGemBody: Encodable {
     var tags: [String]
     var applePlaceId: String?
     var googleMapsUrl: String?
+    var address: String?
+    var confirmedNew: Bool?
 }
 
 struct CreateFindBody: Encodable {
@@ -82,31 +86,17 @@ struct ReportBody: Encodable {
 
 struct EmptyResponse: Decodable {}
 
-struct GemsNearbyResponse: Decodable {
-    var gems: [Gem]
-}
-
-struct MatchResponse: Decodable {
-    var candidates: [MatchCandidate]
-}
-
-struct ActivityResponse: Decodable {
-    var events: [ActivityEvent]
-}
-
-struct StashResponse: Decodable {
-    var gems: [Gem]
-}
-
 actor APIClient {
     static let shared = APIClient()
 
+    /// Set `USE_LOCAL_API=1` in the scheme env to hit localhost in DEBUG.
     var baseURL: URL {
         #if DEBUG
-        URL(string: "http://localhost:3000")!
-        #else
-        URL(string: "https://unearth-1o4a.onrender.com")!
+        if ProcessInfo.processInfo.environment["USE_LOCAL_API"] == "1" {
+            return URL(string: "http://localhost:3000")!
+        }
         #endif
+        return URL(string: "https://unearth-1o4a.onrender.com")!
     }
 
     private var accessToken: String?
@@ -184,6 +174,11 @@ actor APIClient {
         try await post("/auth/apple", body: body)
     }
 
+    /// DEBUG / staging only — requires `ALLOW_DEV_AUTH=true` on the server.
+    func authDev(handle: String? = nil) async throws -> AuthTokensResponse {
+        try await post("/auth/dev", body: DevAuthBody(handle: handle))
+    }
+
     func refresh(refreshToken: String) async throws -> AuthTokensResponse {
         try await post("/auth/refresh", body: RefreshBody(refreshToken: refreshToken))
     }
@@ -254,14 +249,16 @@ actor APIClient {
     }
 
     func gem(id: UUID) async throws -> Gem {
-        try await get("/gems/\(id.uuidString)")
+        let dto: APIGemDTO = try await get("/gems/\(id.uuidString)")
+        return dto.toGem()
     }
 
     func createGem(_ body: CreateGemBody) async throws -> Gem {
-        try await post("/gems", body: body)
+        let response: CreateGemResponse = try await post("/gems", body: body)
+        return response.toGem()
     }
 
-    func createFind(gemId: UUID, body: CreateFindBody) async throws -> Find {
+    func createFind(gemId: UUID, body: CreateFindBody) async throws -> CreateFindResponse {
         try await post("/gems/\(gemId.uuidString)/finds", body: body)
     }
 
@@ -339,6 +336,14 @@ actor APIClient {
                     )
                 }
                 throw APIError.unauthorized
+            }
+
+            if http.statusCode == 409 {
+                if let conflict = try? decoder.decode(DuplicateConflictError.self, from: data),
+                   let candidates = conflict.candidates {
+                    throw APIError.conflict(candidates.map { $0.toMatchCandidate() })
+                }
+                throw APIError.server(409)
             }
 
             guard (200..<300).contains(http.statusCode) else {
