@@ -23,7 +23,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Unearth uses your location while you Dig so nearby gems appear on the map and distances stay accurate.</string>
+	<string>Unearth needs your location while you Dig to show nearby gems on the map, sort by distance, and drop an accurate pin when you Unearth a place. Location is used only while the app is open — we never track you in the background.</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>instagram</string>

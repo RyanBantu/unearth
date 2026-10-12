@@ -151,6 +151,15 @@ final class DigViewModel {
         }
     }
 
+    /// Retry the last nearby fetch (or a provided fallback coordinate).
+    func reloadNearby(fallback: CLLocationCoordinate2D? = nil) async {
+        if let center = lastFetchCenter {
+            await loadNearby(lat: center.latitude, lng: center.longitude, radiusMeters: lastFetchRadiusM)
+        } else if let fallback {
+            await loadNearby(lat: fallback.latitude, lng: fallback.longitude)
+        }
+    }
+
     func loadNearby(lat: Double, lng: Double, radiusMeters: Int = 5_000) async {
         isLoadingNearby = true
         loadError = nil

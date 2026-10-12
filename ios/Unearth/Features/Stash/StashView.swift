@@ -2,17 +2,36 @@ import SwiftUI
 
 struct StashView: View {
     var gems: [Gem] = []
+    var isLoading: Bool = false
+    var loadError: String? = nil
     var onOpenGem: (Gem) -> Void = { _ in }
     var onRefresh: (() async -> Void)? = nil
 
     var body: some View {
         NavigationStack {
             Group {
-                if gems.isEmpty {
-                    emptyState
+                if isLoading, gems.isEmpty {
+                    ScreenStates.Loading(message: "Loading your stash…")
+                } else if let loadError, gems.isEmpty {
+                    ScreenStates.Error(message: loadError) {
+                        Task { await onRefresh?() }
+                    }
+                } else if gems.isEmpty {
+                    ScreenStates.Empty(
+                        systemImage: "bookmark",
+                        title: "Nothing stashed yet",
+                        message: "Your stash is empty. Tap the bookmark on any gem to save it for later."
+                    )
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 12) {
+                            if let loadError {
+                                Text(loadError)
+                                    .font(UnearthFont.bodySmall())
+                                    .foregroundStyle(UnearthColor.amber)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 16)
+                            }
                             ForEach(gems) { gem in
                                 GemCard(gem: gem) {
                                     onOpenGem(gem)
@@ -30,31 +49,16 @@ struct StashView: View {
                         .padding(.top, 8)
                         .padding(.bottom, 24)
                     }
-                    .refreshable {
-                        await onRefresh?()
-                    }
                 }
             }
             .background(UnearthColor.formBackground.ignoresSafeArea())
             .navigationTitle("Stash")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(UnearthColor.surface, for: .navigationBar)
+            .refreshable {
+                await onRefresh?()
+            }
         }
-    }
-
-    private var emptyState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "bookmark")
-                .font(.system(size: 36))
-                .foregroundStyle(UnearthColor.green)
-            Text("Your stash is empty. Tap the bookmark on any gem to save it.")
-                .font(UnearthFont.body())
-                .foregroundStyle(UnearthColor.inkSecondary)
-                .multilineTextAlignment(.center)
-                .bodyLineSpacing()
-                .padding(.horizontal, 32)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -64,4 +68,8 @@ struct StashView: View {
 
 #Preview("StashView empty") {
     StashView(gems: [])
+}
+
+#Preview("StashView loading") {
+    StashView(gems: [], isLoading: true)
 }

@@ -231,9 +231,18 @@ struct DigView: View {
             }
 
             if viewModel.isLoadingNearby, viewModel.gems.isEmpty {
-                ProgressView()
+                ScreenStates.Loading(message: "Finding gems nearby…")
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+                    .frame(height: 120)
+            } else if let error = viewModel.loadError, viewModel.gems.isEmpty {
+                ScreenStates.Error(message: error) {
+                    Task {
+                        await viewModel.reloadNearby(
+                            fallback: locationService.currentLocation?.coordinate
+                        )
+                    }
+                }
+                .frame(height: 160)
             } else if let gem = viewModel.sheetGem(userLocation: locationService.currentLocation) {
                 GemCard(
                     gem: gem,
@@ -242,11 +251,12 @@ struct DigView: View {
                     onOpenGem(gem)
                 }
             } else {
-                Text(viewModel.loadError == nil
-                     ? "No gems near here yet. Unearth the first one."
-                     : (viewModel.loadError ?? "Couldn’t load gems."))
-                    .font(UnearthFont.body())
-                    .foregroundStyle(UnearthColor.inkSecondary)
+                ScreenStates.Empty(
+                    systemImage: "map",
+                    title: "No gems near here",
+                    message: "No gems near here yet. Unearth the first one."
+                )
+                .frame(height: 140)
             }
         }
         .padding(.top, 10)
@@ -268,22 +278,43 @@ struct DigView: View {
 
     private var nearbyListSheet: some View {
         NavigationStack {
-            ScrollView {
-                LazyVStack(spacing: 16) {
-                    ForEach(viewModel.nearbyGemsSorted(from: locationService.currentLocation)) { gem in
-                        GemCard(
-                            gem: gem,
-                            userLocation: locationService.currentLocation
-                        ) {
-                            viewModel.showNearbyList = false
-                            onOpenGem(gem)
+            Group {
+                let gems = viewModel.nearbyGemsSorted(from: locationService.currentLocation)
+                if viewModel.isLoadingNearby, gems.isEmpty {
+                    ScreenStates.Loading(message: "Finding gems nearby…")
+                } else if let error = viewModel.loadError, gems.isEmpty {
+                    ScreenStates.Error(message: error) {
+                        Task {
+                            await viewModel.reloadNearby(
+                                fallback: locationService.currentLocation?.coordinate
+                            )
                         }
-                        .padding(.horizontal, 16)
-                        Divider().overlay(UnearthColor.divider)
+                    }
+                } else if gems.isEmpty {
+                    ScreenStates.Empty(
+                        systemImage: "map",
+                        title: "No gems near here",
+                        message: "No gems near here yet. Unearth the first one."
+                    )
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            ForEach(gems) { gem in
+                                GemCard(
+                                    gem: gem,
+                                    userLocation: locationService.currentLocation
+                                ) {
+                                    viewModel.showNearbyList = false
+                                    onOpenGem(gem)
+                                }
+                                .padding(.horizontal, 16)
+                                Divider().overlay(UnearthColor.divider)
+                            }
+                        }
+                        .padding(.top, 8)
+                        .padding(.bottom, 24)
                     }
                 }
-                .padding(.top, 8)
-                .padding(.bottom, 24)
             }
             .background(UnearthColor.formBackground.ignoresSafeArea())
             .navigationTitle("Gems near you")

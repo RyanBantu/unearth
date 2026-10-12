@@ -9,6 +9,7 @@ struct PickHandleView: View {
     @State private var isChecking = false
     @State private var checkTask: Task<Void, Never>?
     @State private var errorMessage: String?
+    @State private var isSaving = false
 
     private var cleaned: String {
         handle.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -19,7 +20,7 @@ struct PickHandleView: View {
     }
 
     private var isValid: Bool {
-        isFormatValid && availability == true
+        isFormatValid && availability == true && !isSaving
     }
 
     private var statusText: String? {
@@ -45,6 +46,13 @@ struct PickHandleView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
+            HStack {
+                Spacer(minLength: 0)
+                UnearthLogo(size: 64)
+                Spacer(minLength: 0)
+            }
+            .padding(.top, 8)
+
             VStack(alignment: .leading, spacing: 8) {
                 Text("Pick a handle")
                     .font(UnearthFont.sheetTitle())
@@ -105,8 +113,13 @@ struct PickHandleView: View {
 
             Spacer()
 
-            PrimaryButton(title: "Continue", isEnabled: isValid) {
+            PrimaryButton(
+                title: isSaving ? "Saving…" : "Continue",
+                isEnabled: isValid
+            ) {
                 Task {
+                    isSaving = true
+                    defer { isSaving = false }
                     let ok = await auth.completeHandle(cleaned)
                     if ok {
                         onContinue()

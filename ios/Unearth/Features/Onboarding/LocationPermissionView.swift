@@ -6,11 +6,18 @@ struct LocationPermissionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
+            HStack {
+                Spacer(minLength: 0)
+                UnearthLogo(size: 64)
+                Spacer(minLength: 0)
+            }
+            .padding(.top, 8)
+
             VStack(alignment: .leading, spacing: 8) {
                 Text("Enable location for Dig")
                     .font(UnearthFont.sheetTitle())
                     .foregroundStyle(UnearthColor.ink)
-                Text("Unearth uses your location while you Dig so nearby gems show on the map and distance stays accurate. We never track you in the background.")
+                Text("Unearth needs your location while you Dig to show nearby gems, sort by distance, and place an accurate pin when you Unearth. We only use location while the app is open — never in the background.")
                     .font(UnearthFont.body())
                     .foregroundStyle(UnearthColor.inkSecondary)
                     .bodyLineSpacing()

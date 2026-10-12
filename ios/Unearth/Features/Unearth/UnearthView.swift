@@ -49,6 +49,7 @@ struct UnearthView: View {
                         }
 
                         categorySection
+                        postingGuidelinesNote
                         whySection
                         likedDislikedRow
                         tagsSection
@@ -309,6 +310,31 @@ struct UnearthView: View {
                 }
             }
         }
+    }
+
+    private var postingGuidelinesNote: some View {
+        Link(destination: UnearthLinks.postingGuidelines) {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: "info.circle")
+                    .foregroundStyle(UnearthColor.green)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Public places only")
+                        .font(UnearthFont.label())
+                        .foregroundStyle(UnearthColor.ink)
+                    Text("Read posting guidelines before you Unearth.")
+                        .font(UnearthFont.bodySmall())
+                        .foregroundStyle(UnearthColor.inkSecondary)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(UnearthColor.green)
+            }
+            .padding(12)
+            .background(UnearthColor.greenTint)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Why

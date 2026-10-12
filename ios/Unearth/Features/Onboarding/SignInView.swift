@@ -12,8 +12,9 @@ struct SignInView: View {
             Spacer()
 
             VStack(spacing: 16) {
-                // From Resources/Brand/unearth-logo.svg
-                UnearthLogo(size: 96)
+                // Matches Resources/Brand/unearth-logo.svg
+                UnearthLogo(size: 112)
+                    .accessibilityLabel("Unearth logo")
 
                 Text("Unearth")
                     .font(UnearthFont.gemTitle(40))

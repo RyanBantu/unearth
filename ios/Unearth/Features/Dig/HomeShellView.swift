@@ -14,6 +14,8 @@ struct HomeShellView: View {
     @State private var reopenGemAfterFind: UUID?
     @State private var toastMessage: String?
     @State private var stashGems: [Gem] = []
+    @State private var stashIsLoading = false
+    @State private var stashError: String?
     @State private var stashReloadToken = 0
 
     var body: some View {
@@ -25,6 +27,8 @@ struct HomeShellView: View {
                 case .stash:
                     StashView(
                         gems: stashGems,
+                        isLoading: stashIsLoading,
+                        loadError: stashError,
                         onOpenGem: { presentedGem = PresentedGem(id: $0.id) },
                         onRefresh: { await loadStash() }
                     )
@@ -132,6 +136,9 @@ struct HomeShellView: View {
     }
 
     private func loadStash() async {
+        stashIsLoading = true
+        stashError = nil
+        defer { stashIsLoading = false }
         do {
             let response = try await APIClient.shared.stash()
             stashGems = response.gems.map {
@@ -140,7 +147,10 @@ struct HomeShellView: View {
                 return gem
             }
         } catch {
-            stashGems = []
+            stashError = error.localizedDescription
+            if stashGems.isEmpty {
+                stashGems = []
+            }
         }
     }
 
@@ -179,21 +189,15 @@ private struct GemDetailHost: View {
                     await reloadQuietly()
                 }
             } else if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                ScreenStates.Loading(message: "Loading gem…")
                     .background(UnearthColor.formBackground.ignoresSafeArea())
             } else {
                 VStack(spacing: 16) {
-                    Text(errorMessage ?? "Couldn’t load this gem.")
-                        .font(UnearthFont.body())
-                        .foregroundStyle(UnearthColor.inkSecondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
-                    Button("Try again") {
+                    ScreenStates.Error(
+                        message: errorMessage ?? "Couldn’t load this gem."
+                    ) {
                         Task { await load() }
                     }
-                    .font(UnearthFont.button())
-                    .foregroundStyle(UnearthColor.green)
                     Button("Close", action: onClose)
                         .font(UnearthFont.label())
                         .foregroundStyle(UnearthColor.inkSecondary)

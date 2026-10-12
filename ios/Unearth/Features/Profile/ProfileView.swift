@@ -5,11 +5,12 @@ struct ProfileView: View {
     var onSignOut: () -> Void = {}
     var onDeleteAccount: (() async -> Void)? = nil
 
-    @State private var user: User
+    @State private var user: User?
     @State private var showDeleteConfirm = false
     @State private var isDeleting = false
     @State private var isLoading = false
     @State private var loadError: String?
+    @State private var hasLoadedOnce = false
 
     init(
         auth: AuthService,
@@ -19,18 +20,22 @@ struct ProfileView: View {
         self.auth = auth
         self.onSignOut = onSignOut
         self.onDeleteAccount = onDeleteAccount
-        _user = State(initialValue: auth.currentUser ?? .mock)
+        _user = State(initialValue: auth.currentUser)
     }
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    header
-                    stats
-                    findsSection
-                    settingsSection
-                    Spacer(minLength: 40)
+            Group {
+                if isLoading, user == nil {
+                    ScreenStates.Loading(message: "Loading profile…")
+                } else if let loadError, user == nil, hasLoadedOnce {
+                    ScreenStates.Error(message: loadError) {
+                        Task { await reload() }
+                    }
+                } else if let user {
+                    profileContent(user)
+                } else {
+                    ScreenStates.Loading(message: "Loading profile…")
                 }
             }
             .background(UnearthColor.formBackground.ignoresSafeArea())
@@ -53,7 +58,26 @@ struct ProfileView: View {
         }
     }
 
-    private var header: some View {
+    private func profileContent(_ user: User) -> some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                header(user)
+                if let loadError {
+                    Text(loadError)
+                        .font(UnearthFont.bodySmall())
+                        .foregroundStyle(UnearthColor.amber)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                }
+                stats(user)
+                findsSection(user)
+                settingsSection
+                Spacer(minLength: 40)
+            }
+        }
+    }
+
+    private func header(_ user: User) -> some View {
         VStack(spacing: 12) {
             Avatar(handle: user.handle, size: 72)
             Text("@\(user.handle)")
@@ -64,19 +88,12 @@ struct ProfileView: View {
                 ProgressView()
                     .scaleEffect(0.8)
             }
-            if let loadError {
-                Text(loadError)
-                    .font(UnearthFont.bodySmall())
-                    .foregroundStyle(UnearthColor.amber)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
-            }
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 24)
     }
 
-    private var stats: some View {
+    private func stats(_ user: User) -> some View {
         VStack(spacing: 8) {
             Text(user.gemsUnearthedLabel)
                 .font(UnearthFont.gemTitle(28))
@@ -90,7 +107,7 @@ struct ProfileView: View {
         .padding(.horizontal, 16)
     }
 
-    private var findsSection: some View {
+    private func findsSection(_ user: User) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Your finds")
                 .font(UnearthFont.label())
@@ -98,10 +115,12 @@ struct ProfileView: View {
                 .padding(.horizontal, 16)
 
             if user.finds.isEmpty {
-                Text("No finds yet. Unearth a gem to get started.")
-                    .font(UnearthFont.body())
-                    .foregroundStyle(UnearthColor.inkSecondary)
-                    .padding(.horizontal, 16)
+                ScreenStates.Empty(
+                    systemImage: "diamond",
+                    title: "No finds yet",
+                    message: "Unearth a gem to get started. Your finds will show up here."
+                )
+                .frame(minHeight: 160)
             } else {
                 LazyVStack(spacing: 0) {
                     ForEach(user.finds) { find in
@@ -146,6 +165,18 @@ struct ProfileView: View {
                 .foregroundStyle(UnearthColor.ink)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
+            settingsLink(
+                title: "Privacy policy",
+                subtitle: "How Unearth uses your data",
+                url: UnearthLinks.privacyPolicy
+            )
+
+            settingsLink(
+                title: "Posting guidelines",
+                subtitle: "Public places only",
+                url: UnearthLinks.postingGuidelines
+            )
+
             OutlineButton(title: "Sign out") {
                 onSignOut()
             }
@@ -165,18 +196,49 @@ struct ProfileView: View {
         .padding(.horizontal, 16)
     }
 
+    private func settingsLink(title: String, subtitle: String, url: URL) -> some View {
+        Link(destination: url) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(UnearthFont.button())
+                        .foregroundStyle(UnearthColor.ink)
+                    Text(subtitle)
+                        .font(UnearthFont.bodySmall())
+                        .foregroundStyle(UnearthColor.inkSecondary)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(UnearthColor.green)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(UnearthColor.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(UnearthColor.border, lineWidth: 1)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
     private func reload() async {
         isLoading = true
         loadError = nil
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+            hasLoadedOnce = true
+        }
         do {
             let me = try await APIClient.shared.me()
             user = me
             auth.applyLoadedUser(me)
         } catch {
             loadError = error.localizedDescription
-            if let cached = auth.currentUser {
-                user = cached
+            if user == nil {
+                user = auth.currentUser
             }
         }
     }

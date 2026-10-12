@@ -4,15 +4,23 @@ struct ActivityView: View {
     @State private var events: [ActivityEvent] = []
     @State private var isLoading = false
     @State private var loadError: String?
+    @State private var hasLoadedOnce = false
 
     var body: some View {
         NavigationStack {
             Group {
                 if isLoading, events.isEmpty {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if events.isEmpty {
-                    emptyState
+                    ScreenStates.Loading(message: "Loading activity…")
+                } else if let loadError, events.isEmpty, hasLoadedOnce {
+                    ScreenStates.Error(message: loadError) {
+                        Task { await load() }
+                    }
+                } else if events.isEmpty, hasLoadedOnce {
+                    ScreenStates.Empty(
+                        systemImage: "bell",
+                        title: "No activity yet",
+                        message: "Nothing yet. Unearth your first gem and updates will show up here."
+                    )
                 } else {
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0) {
@@ -36,6 +44,17 @@ struct ActivityView: View {
                             }
                         }
                     }
+                    .overlay(alignment: .bottom) {
+                        if let loadError, !events.isEmpty {
+                            Text(loadError)
+                                .font(UnearthFont.bodySmall())
+                                .foregroundStyle(UnearthColor.amber)
+                                .padding(8)
+                                .background(UnearthColor.amberTint)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .padding(.bottom, 12)
+                        }
+                    }
                 }
             }
             .background(UnearthColor.formBackground.ignoresSafeArea())
@@ -43,42 +62,7 @@ struct ActivityView: View {
             .navigationBarTitleDisplayMode(.inline)
             .refreshable { await load() }
             .task { await load() }
-            .overlay(alignment: .bottom) {
-                if let loadError, !events.isEmpty {
-                    Text(loadError)
-                        .font(UnearthFont.bodySmall())
-                        .foregroundStyle(UnearthColor.amber)
-                        .padding(8)
-                        .background(UnearthColor.amberTint)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .padding(.bottom, 12)
-                }
-            }
         }
-    }
-
-    private var emptyState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "bell")
-                .font(.system(size: 36))
-                .foregroundStyle(UnearthColor.green)
-            Text(loadError == nil
-                 ? "Nothing yet. Unearth your first gem."
-                 : (loadError ?? "Couldn’t load activity."))
-                .font(UnearthFont.body())
-                .foregroundStyle(UnearthColor.inkSecondary)
-                .multilineTextAlignment(.center)
-                .bodyLineSpacing()
-                .padding(.horizontal, 32)
-            if loadError != nil {
-                Button("Try again") {
-                    Task { await load() }
-                }
-                .font(UnearthFont.button())
-                .foregroundStyle(UnearthColor.green)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func eventIcon(_ kind: ActivityEventKind) -> some View {
@@ -100,7 +84,10 @@ struct ActivityView: View {
     private func load() async {
         isLoading = true
         loadError = nil
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+            hasLoadedOnce = true
+        }
         do {
             let response = try await APIClient.shared.activity()
             events = response.events
