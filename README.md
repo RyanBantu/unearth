@@ -53,8 +53,8 @@ open Unearth.xcodeproj
 ```
 
 1. Set your **Signing Team** on the Unearth target.
-2. Enable **Sign in with Apple** capability (entitlements file included).
-3. DEBUG builds use `http://localhost:3000` and include a mock sign-in. RELEASE points at `https://unearth-1o4a.onrender.com`.
+2. **Sign in with Apple** entitlement is in `Unearth.entitlements` — follow [docs/SIGN_IN_WITH_APPLE.md](docs/SIGN_IN_WITH_APPLE.md) for Apple Developer + Render keys.
+3. DEBUG hits Render by default (set `USE_LOCAL_API=1` for localhost) and includes mock sign-in until SIWA keys are live.
 4. Run on a simulator or device.
 
 Fonts: Bricolage Grotesque + DM Sans (OFL) are bundled under `Unearth/Resources/Fonts/` and registered in `Info.plist`.

@@ -39,6 +39,11 @@ targets:
         ENABLE_PREVIEWS: YES
     entitlements:
       path: Unearth/Unearth.entitlements
+      properties:
+        com.apple.developer.applesignin:
+          - Default
+    systemCapabilities:
+      com.apple.SignInWithApple: true
 schemes:
   Unearth:
     build:

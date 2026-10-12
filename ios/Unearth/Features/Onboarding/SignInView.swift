@@ -27,7 +27,7 @@ struct SignInView: View {
 
             VStack(spacing: 12) {
                 SignInWithAppleButton(.signIn) { request in
-                    request.requestedScopes = [.fullName]
+                    request.requestedScopes = [.fullName, .email]
                 } onCompletion: { result in
                     Task {
                         switch result {
@@ -36,9 +36,9 @@ struct SignInView: View {
                                 await auth.handleAppleSignIn(credential: credential)
                                 onSignedIn()
                             }
-                        case .failure:
-                            // TODO: surface Apple Sign In errors
-                            break
+                        case .failure(let error):
+                            // Surface via toast when wired; keep console for now.
+                            print("Sign in with Apple failed: \(error.localizedDescription)")
                         }
                     }
                 }
