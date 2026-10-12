@@ -1,0 +1,580 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0013A0176601E7009DACB4A5 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E53DB82A53CCF23E9A9E991 /* SignInView.swift */; };
+		0D05EEC649C24515B797BF69 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACF63465BD82FB1FE5F4E22 /* User.swift */; };
+		0E21EB00B31BBFB087460F2E /* ActivityEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14080EDFBF95D9D930C50F7C /* ActivityEvent.swift */; };
+		1DD6BC3D5D1EF783C38606A6 /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93BDF2871A86C8D3CB1C65C5 /* Badge.swift */; };
+		21A0E5EF51AC365E9293C1E1 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8383F9818953A916781AF4B2 /* APIClient.swift */; };
+		21D7E2CFAC7BD8E4F916209E /* GemCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A65CAB0F4DD10BA2B5D6131 /* GemCard.swift */; };
+		22A748D8992E1A9CECD9C279 /* Gem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F18A4593545C190882F28D97 /* Gem.swift */; };
+		25C83047C6D7E1AB15CB673B /* TagChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCA87590435BFB6DC51486F5 /* TagChip.swift */; };
+		2790DA07E5B971AD5D5F0189 /* MatchCandidate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5B3665C5E331619BBFAE73 /* MatchCandidate.swift */; };
+		396CBEC8CD42C09F735858BA /* UnearthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7BD346328B8A99B0F7E705E /* UnearthViewModel.swift */; };
+		48D961E67D586F39E41081A9 /* Chip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9120316D91BF39A4BCBF89 /* Chip.swift */; };
+		4A5444F183597B4A328D3633 /* Shadows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80C70C906423387F6C40D177 /* Shadows.swift */; };
+		4C0F73931744C0008A757567 /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89250ABAC52C02F2D97574FB /* OnboardingFlowView.swift */; };
+		58AA4EF8179C21447F1C56FE /* GemDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E967D5CE59939352E4B4B444 /* GemDetailView.swift */; };
+		734C51A4C794799B41730FA4 /* Avatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D39CA304D48EF10F2E4D68 /* Avatar.swift */; };
+		758CE68B8885EB76700AD068 /* LocationPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00A5740E63FB6BE5068E1C2 /* LocationPermissionView.swift */; };
+		7A83B21F272FFDCC7F795391 /* HomeShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B43D726E1D0A2C76D9D16D /* HomeShellView.swift */; };
+		7DBFBF457D29577EA0408B1D /* UnearthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27BE402028C939B2B1EAF544 /* UnearthApp.swift */; };
+		829FACA8EB81BC474FE5AE85 /* PrimaryButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8166C42DA5D0CDA8EB5606E5 /* PrimaryButton.swift */; };
+		83C3BD63CC84EED6FB55F591 /* GemStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402856382406C1482517A216 /* GemStatus.swift */; };
+		84081EA3DB4AA0A47E3706F0 /* OutlineButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 721B41F36D197D2E5296421D /* OutlineButton.swift */; };
+		84386A1903380AE8D7C9C17C /* PickHandleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06EE049D01B49F3202B651F /* PickHandleView.swift */; };
+		8A7BABF58131A446EBE83A8C /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198406CFB0029AF3302A735A /* AuthService.swift */; };
+		912610495A200F790230026F /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B28F5915F1D6E26A40BBD2 /* KeychainStore.swift */; };
+		A291BD561487DF3640CD4E94 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C71195FA3BED6B69C4163F8 /* ProfileView.swift */; };
+		A442F6F99836721F16F16238 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A20244C2C0FCF6DEDE1D3CB /* LocationService.swift */; };
+		A4F4BE5CC4008A3A08939C29 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7CBA5BADC0A72A3E1E44FDD /* Toast.swift */; };
+		AE5933C2315875BF551AC0E1 /* DigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEEE33628064361C7560BAC4 /* DigView.swift */; };
+		B19E1366A9FCB26F9D637F9E /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA4D605A9C263CF249AD91D /* Typography.swift */; };
+		B4B7C253EBB22E05C02F0160 /* UnearthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F44D807E0F4B1DB08E143C3 /* UnearthView.swift */; };
+		B98DE4EC20FCF7F5E98A784E /* MainTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D9069685394D23B9EC66F7 /* MainTabBar.swift */; };
+		C5FE0F01E833C081626BF17B /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03B98493B09F45DCED59FBDD /* Colors.swift */; };
+		D4693FFB85A2BDF885FACE86 /* StashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7DD063BCD904E797178190 /* StashView.swift */; };
+		D9A881FFACCD3CE1BAF633F9 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 655726F68DE05DFC7272F997 /* Category.swift */; };
+		E41AF36A99B80E49BFD97C49 /* PlaceSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1800026F5C3D28D48868B756 /* PlaceSearchService.swift */; };
+		EBF743E1BCAF99CF13ECCB85 /* RoundIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B8EC344CA7973274C2155D /* RoundIconButton.swift */; };
+		F0EE8F7786EDEDEBCA1FA93C /* GemPinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A048782079ECEA307A04FF /* GemPinView.swift */; };
+		F69D2A579E5ABB3D452934BF /* DigViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42ABBBE511D9BD7CD6915092 /* DigViewModel.swift */; };
+		F7F1D04FD8CE8E4F17B682E1 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B905DD6FAD1C3D82EEC4D52A /* RootView.swift */; };
+		F86F94B0A8FC92461B30D419 /* Find.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FBE0FEEC407F810EF501B12 /* Find.swift */; };
+		FBDFA7A1A45C3D5145AF72BA /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19D697ACA839E97B29AE825 /* ActivityView.swift */; };
+		FE7C19684358702E0DC43EE9 /* Field.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F369C050A458469EA5CDF69 /* Field.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0083A213A793C6B0A592BA8D /* Unearth.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Unearth.entitlements; sourceTree = "<group>"; };
+		00A048782079ECEA307A04FF /* GemPinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GemPinView.swift; sourceTree = "<group>"; };
+		03B98493B09F45DCED59FBDD /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		0ADBDEBE90DEA77022655637 /* Unearth.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Unearth.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13D39CA304D48EF10F2E4D68 /* Avatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Avatar.swift; sourceTree = "<group>"; };
+		14080EDFBF95D9D930C50F7C /* ActivityEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityEvent.swift; sourceTree = "<group>"; };
+		1800026F5C3D28D48868B756 /* PlaceSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceSearchService.swift; sourceTree = "<group>"; };
+		198406CFB0029AF3302A735A /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		1A65CAB0F4DD10BA2B5D6131 /* GemCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GemCard.swift; sourceTree = "<group>"; };
+		1FBE0FEEC407F810EF501B12 /* Find.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Find.swift; sourceTree = "<group>"; };
+		27BE402028C939B2B1EAF544 /* UnearthApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnearthApp.swift; sourceTree = "<group>"; };
+		2A20244C2C0FCF6DEDE1D3CB /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		2C71195FA3BED6B69C4163F8 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		2E53DB82A53CCF23E9A9E991 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
+		32B8EC344CA7973274C2155D /* RoundIconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundIconButton.swift; sourceTree = "<group>"; };
+		33D9069685394D23B9EC66F7 /* MainTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBar.swift; sourceTree = "<group>"; };
+		3F369C050A458469EA5CDF69 /* Field.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Field.swift; sourceTree = "<group>"; };
+		402856382406C1482517A216 /* GemStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GemStatus.swift; sourceTree = "<group>"; };
+		42ABBBE511D9BD7CD6915092 /* DigViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DigViewModel.swift; sourceTree = "<group>"; };
+		47B28F5915F1D6E26A40BBD2 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		4C7DD063BCD904E797178190 /* StashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StashView.swift; sourceTree = "<group>"; };
+		655726F68DE05DFC7272F997 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
+		6B5B3665C5E331619BBFAE73 /* MatchCandidate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchCandidate.swift; sourceTree = "<group>"; };
+		721B41F36D197D2E5296421D /* OutlineButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlineButton.swift; sourceTree = "<group>"; };
+		7F44D807E0F4B1DB08E143C3 /* UnearthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnearthView.swift; sourceTree = "<group>"; };
+		80C70C906423387F6C40D177 /* Shadows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadows.swift; sourceTree = "<group>"; };
+		8166C42DA5D0CDA8EB5606E5 /* PrimaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
+		8383F9818953A916781AF4B2 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		89250ABAC52C02F2D97574FB /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
+		8B9120316D91BF39A4BCBF89 /* Chip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chip.swift; sourceTree = "<group>"; };
+		93BDF2871A86C8D3CB1C65C5 /* Badge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Badge.swift; sourceTree = "<group>"; };
+		9FA4D605A9C263CF249AD91D /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		A00A5740E63FB6BE5068E1C2 /* LocationPermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPermissionView.swift; sourceTree = "<group>"; };
+		A1B43D726E1D0A2C76D9D16D /* HomeShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeShellView.swift; sourceTree = "<group>"; };
+		A1D01439C0187B015C4A6C37 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		A7CBA5BADC0A72A3E1E44FDD /* Toast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
+		AEEE33628064361C7560BAC4 /* DigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DigView.swift; sourceTree = "<group>"; };
+		B06EE049D01B49F3202B651F /* PickHandleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickHandleView.swift; sourceTree = "<group>"; };
+		B905DD6FAD1C3D82EEC4D52A /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		CCA87590435BFB6DC51486F5 /* TagChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagChip.swift; sourceTree = "<group>"; };
+		D19D697ACA839E97B29AE825 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
+		DACF63465BD82FB1FE5F4E22 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		E7BD346328B8A99B0F7E705E /* UnearthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnearthViewModel.swift; sourceTree = "<group>"; };
+		E967D5CE59939352E4B4B444 /* GemDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GemDetailView.swift; sourceTree = "<group>"; };
+		F18A4593545C190882F28D97 /* Gem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gem.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		002FE7C84BB608E39DF96905 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				8383F9818953A916781AF4B2 /* APIClient.swift */,
+				198406CFB0029AF3302A735A /* AuthService.swift */,
+				47B28F5915F1D6E26A40BBD2 /* KeychainStore.swift */,
+				2A20244C2C0FCF6DEDE1D3CB /* LocationService.swift */,
+				1800026F5C3D28D48868B756 /* PlaceSearchService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		0F720A79D5A32C5E7F9ADBB7 /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				3234BE45B257118B24127307 /* Components */,
+				03B98493B09F45DCED59FBDD /* Colors.swift */,
+				80C70C906423387F6C40D177 /* Shadows.swift */,
+				9FA4D605A9C263CF249AD91D /* Typography.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		18F9106EFE56C929CEA0B581 /* Stash */ = {
+			isa = PBXGroup;
+			children = (
+				4C7DD063BCD904E797178190 /* StashView.swift */,
+			);
+			path = Stash;
+			sourceTree = "<group>";
+		};
+		1D91AC52C8DA712244AB1625 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				14080EDFBF95D9D930C50F7C /* ActivityEvent.swift */,
+				655726F68DE05DFC7272F997 /* Category.swift */,
+				1FBE0FEEC407F810EF501B12 /* Find.swift */,
+				F18A4593545C190882F28D97 /* Gem.swift */,
+				402856382406C1482517A216 /* GemStatus.swift */,
+				6B5B3665C5E331619BBFAE73 /* MatchCandidate.swift */,
+				DACF63465BD82FB1FE5F4E22 /* User.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		2419F307B2EF7C8251394DF4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0ADBDEBE90DEA77022655637 /* Unearth.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2C5715394AFA835B8466E677 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				E50C189D303BE001390C5BB4 /* Activity */,
+				8D7322F85935C7BFAAAF5910 /* Dig */,
+				D99017FB62A5C11CC185788C /* GemDetail */,
+				B6A7D994F65E97C7CF470E8D /* Onboarding */,
+				F56E63913F54E713452C0672 /* Profile */,
+				18F9106EFE56C929CEA0B581 /* Stash */,
+				6A5B80CB11756FDBCB2EE489 /* Unearth */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		3234BE45B257118B24127307 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				13D39CA304D48EF10F2E4D68 /* Avatar.swift */,
+				93BDF2871A86C8D3CB1C65C5 /* Badge.swift */,
+				8B9120316D91BF39A4BCBF89 /* Chip.swift */,
+				3F369C050A458469EA5CDF69 /* Field.swift */,
+				1A65CAB0F4DD10BA2B5D6131 /* GemCard.swift */,
+				721B41F36D197D2E5296421D /* OutlineButton.swift */,
+				8166C42DA5D0CDA8EB5606E5 /* PrimaryButton.swift */,
+				32B8EC344CA7973274C2155D /* RoundIconButton.swift */,
+				CCA87590435BFB6DC51486F5 /* TagChip.swift */,
+				A7CBA5BADC0A72A3E1E44FDD /* Toast.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		6A5B80CB11756FDBCB2EE489 /* Unearth */ = {
+			isa = PBXGroup;
+			children = (
+				7F44D807E0F4B1DB08E143C3 /* UnearthView.swift */,
+				E7BD346328B8A99B0F7E705E /* UnearthViewModel.swift */,
+			);
+			path = Unearth;
+			sourceTree = "<group>";
+		};
+		8D7322F85935C7BFAAAF5910 /* Dig */ = {
+			isa = PBXGroup;
+			children = (
+				AEEE33628064361C7560BAC4 /* DigView.swift */,
+				42ABBBE511D9BD7CD6915092 /* DigViewModel.swift */,
+				00A048782079ECEA307A04FF /* GemPinView.swift */,
+				A1B43D726E1D0A2C76D9D16D /* HomeShellView.swift */,
+				33D9069685394D23B9EC66F7 /* MainTabBar.swift */,
+			);
+			path = Dig;
+			sourceTree = "<group>";
+		};
+		A119510603BD44DEEE12B2D1 /* Unearth */ = {
+			isa = PBXGroup;
+			children = (
+				E8EA5DC07C0C105BDB8E86C5 /* App */,
+				0F720A79D5A32C5E7F9ADBB7 /* Design */,
+				2C5715394AFA835B8466E677 /* Features */,
+				1D91AC52C8DA712244AB1625 /* Models */,
+				A79EFF6D791831B8E1203BB5 /* Resources */,
+				002FE7C84BB608E39DF96905 /* Services */,
+				A1D01439C0187B015C4A6C37 /* Info.plist */,
+				0083A213A793C6B0A592BA8D /* Unearth.entitlements */,
+			);
+			path = Unearth;
+			sourceTree = "<group>";
+		};
+		A4F1C254BAF946F10067318A = {
+			isa = PBXGroup;
+			children = (
+				A119510603BD44DEEE12B2D1 /* Unearth */,
+				2419F307B2EF7C8251394DF4 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A79EFF6D791831B8E1203BB5 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		B6A7D994F65E97C7CF470E8D /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				A00A5740E63FB6BE5068E1C2 /* LocationPermissionView.swift */,
+				89250ABAC52C02F2D97574FB /* OnboardingFlowView.swift */,
+				B06EE049D01B49F3202B651F /* PickHandleView.swift */,
+				2E53DB82A53CCF23E9A9E991 /* SignInView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		D99017FB62A5C11CC185788C /* GemDetail */ = {
+			isa = PBXGroup;
+			children = (
+				E967D5CE59939352E4B4B444 /* GemDetailView.swift */,
+			);
+			path = GemDetail;
+			sourceTree = "<group>";
+		};
+		E50C189D303BE001390C5BB4 /* Activity */ = {
+			isa = PBXGroup;
+			children = (
+				D19D697ACA839E97B29AE825 /* ActivityView.swift */,
+			);
+			path = Activity;
+			sourceTree = "<group>";
+		};
+		E8EA5DC07C0C105BDB8E86C5 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				B905DD6FAD1C3D82EEC4D52A /* RootView.swift */,
+				27BE402028C939B2B1EAF544 /* UnearthApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		F56E63913F54E713452C0672 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				2C71195FA3BED6B69C4163F8 /* ProfileView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D594B0531CA59C02695ED567 /* Unearth */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7079F0EF67D9053A55A6CF63 /* Build configuration list for PBXNativeTarget "Unearth" */;
+			buildPhases = (
+				03B622526C0141E2FBE755C4 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Unearth;
+			packageProductDependencies = (
+			);
+			productName = Unearth;
+			productReference = 0ADBDEBE90DEA77022655637 /* Unearth.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C19BAD70F9196116594632EC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 61128A946B52FAF1BE22F16A /* Build configuration list for PBXProject "Unearth" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = A4F1C254BAF946F10067318A;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 2419F307B2EF7C8251394DF4 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D594B0531CA59C02695ED567 /* Unearth */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		03B622526C0141E2FBE755C4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21A0E5EF51AC365E9293C1E1 /* APIClient.swift in Sources */,
+				0E21EB00B31BBFB087460F2E /* ActivityEvent.swift in Sources */,
+				FBDFA7A1A45C3D5145AF72BA /* ActivityView.swift in Sources */,
+				8A7BABF58131A446EBE83A8C /* AuthService.swift in Sources */,
+				734C51A4C794799B41730FA4 /* Avatar.swift in Sources */,
+				1DD6BC3D5D1EF783C38606A6 /* Badge.swift in Sources */,
+				D9A881FFACCD3CE1BAF633F9 /* Category.swift in Sources */,
+				48D961E67D586F39E41081A9 /* Chip.swift in Sources */,
+				C5FE0F01E833C081626BF17B /* Colors.swift in Sources */,
+				AE5933C2315875BF551AC0E1 /* DigView.swift in Sources */,
+				F69D2A579E5ABB3D452934BF /* DigViewModel.swift in Sources */,
+				FE7C19684358702E0DC43EE9 /* Field.swift in Sources */,
+				F86F94B0A8FC92461B30D419 /* Find.swift in Sources */,
+				22A748D8992E1A9CECD9C279 /* Gem.swift in Sources */,
+				21D7E2CFAC7BD8E4F916209E /* GemCard.swift in Sources */,
+				58AA4EF8179C21447F1C56FE /* GemDetailView.swift in Sources */,
+				F0EE8F7786EDEDEBCA1FA93C /* GemPinView.swift in Sources */,
+				83C3BD63CC84EED6FB55F591 /* GemStatus.swift in Sources */,
+				7A83B21F272FFDCC7F795391 /* HomeShellView.swift in Sources */,
+				912610495A200F790230026F /* KeychainStore.swift in Sources */,
+				758CE68B8885EB76700AD068 /* LocationPermissionView.swift in Sources */,
+				A442F6F99836721F16F16238 /* LocationService.swift in Sources */,
+				B98DE4EC20FCF7F5E98A784E /* MainTabBar.swift in Sources */,
+				2790DA07E5B971AD5D5F0189 /* MatchCandidate.swift in Sources */,
+				4C0F73931744C0008A757567 /* OnboardingFlowView.swift in Sources */,
+				84081EA3DB4AA0A47E3706F0 /* OutlineButton.swift in Sources */,
+				84386A1903380AE8D7C9C17C /* PickHandleView.swift in Sources */,
+				E41AF36A99B80E49BFD97C49 /* PlaceSearchService.swift in Sources */,
+				829FACA8EB81BC474FE5AE85 /* PrimaryButton.swift in Sources */,
+				A291BD561487DF3640CD4E94 /* ProfileView.swift in Sources */,
+				F7F1D04FD8CE8E4F17B682E1 /* RootView.swift in Sources */,
+				EBF743E1BCAF99CF13ECCB85 /* RoundIconButton.swift in Sources */,
+				4A5444F183597B4A328D3633 /* Shadows.swift in Sources */,
+				0013A0176601E7009DACB4A5 /* SignInView.swift in Sources */,
+				D4693FFB85A2BDF885FACE86 /* StashView.swift in Sources */,
+				25C83047C6D7E1AB15CB673B /* TagChip.swift in Sources */,
+				A4F4BE5CC4008A3A08939C29 /* Toast.swift in Sources */,
+				B19E1366A9FCB26F9D637F9E /* Typography.swift in Sources */,
+				7DBFBF457D29577EA0408B1D /* UnearthApp.swift in Sources */,
+				B4B7C253EBB22E05C02F0160 /* UnearthView.swift in Sources */,
+				396CBEC8CD42C09F735858BA /* UnearthViewModel.swift in Sources */,
+				0D05EEC649C24515B797BF69 /* User.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1D25C97A55D45981BA148D39 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Unearth/Unearth.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Unearth/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.unearth.app;
+				PRODUCT_NAME = Unearth;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		23088D91D3477F80FC79B75A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Unearth/Unearth.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Unearth/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.unearth.app;
+				PRODUCT_NAME = Unearth;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		8D02D061016D51609A718B33 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BCCF107934C22C68360D4E9D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		61128A946B52FAF1BE22F16A /* Build configuration list for PBXProject "Unearth" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8D02D061016D51609A718B33 /* Debug */,
+				BCCF107934C22C68360D4E9D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7079F0EF67D9053A55A6CF63 /* Build configuration list for PBXNativeTarget "Unearth" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1D25C97A55D45981BA148D39 /* Debug */,
+				23088D91D3477F80FC79B75A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C19BAD70F9196116594632EC /* Project object */;
+}

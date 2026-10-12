@@ -1,0 +1,32 @@
+# Xcode
+DerivedData/
+.derivedData/
+build/
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.swiftpm/
+Packages/
+Package.resolved
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+# Node
+server/node_modules/
+server/dist/
+server/.env
+server/.env.bak
+
+# macOS
+.DS_Store
+
+# Secrets / local
+.netrc
+*.mobileprovision
+*.p8
