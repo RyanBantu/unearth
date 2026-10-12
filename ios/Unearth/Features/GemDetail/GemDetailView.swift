@@ -15,10 +15,22 @@ struct GemDetailView: View {
     @State private var toastMessage: String?
     @State private var hasLookAround = false
     @State private var didCheckLookAround = false
-    @State private var showReportConfirm = false
+    @State private var reportTarget: ReportTarget?
     @State private var isRefreshing = false
 
     private let firstFindBodyColor = Color(hex: 0x2A3530)
+
+    private enum ReportTarget: Identifiable, Equatable {
+        case gem
+        case find(UUID)
+
+        var id: String {
+            switch self {
+            case .gem: return "gem"
+            case .find(let id): return id.uuidString
+            }
+        }
+    }
 
     init(
         gem: Gem,
@@ -159,7 +171,17 @@ struct GemDetailView: View {
 
             findersStrip
 
-            if let note = gem.firstFind?.note ?? gem.note {
+            if let first = gem.firstFind {
+                VStack(alignment: .leading, spacing: 8) {
+                    if let note = first.note ?? gem.note {
+                        Text(note)
+                            .font(UnearthFont.body())
+                            .foregroundStyle(firstFindBodyColor)
+                            .bodyLineSpacing()
+                    }
+                    reportFindButton(findId: first.id)
+                }
+            } else if let note = gem.note {
                 Text(note)
                     .font(UnearthFont.body())
                     .foregroundStyle(firstFindBodyColor)
@@ -316,6 +338,7 @@ struct GemDetailView: View {
                             .font(UnearthFont.bodySmall())
                             .foregroundStyle(UnearthColor.amber)
                     }
+                    reportFindButton(findId: find.id)
                 }
                 .padding(.vertical, 12)
                 if find.id != gem.otherFinds.last?.id {
@@ -323,6 +346,15 @@ struct GemDetailView: View {
                 }
             }
         }
+    }
+
+    private func reportFindButton(findId: UUID) -> some View {
+        Button("Report find") {
+            reportTarget = .find(findId)
+        }
+        .font(UnearthFont.bodySmall())
+        .foregroundStyle(UnearthColor.inkTertiary)
+        .buttonStyle(.plain)
     }
 
     // MARK: - Bottom bar
@@ -363,8 +395,8 @@ struct GemDetailView: View {
                 .buttonStyle(.plain)
             }
 
-            Button("Report") {
-                showReportConfirm = true
+            Button("Report gem") {
+                reportTarget = .gem
             }
             .font(UnearthFont.bodySmall())
             .foregroundStyle(UnearthColor.inkSecondary)
@@ -374,11 +406,36 @@ struct GemDetailView: View {
         .padding(.top, 12)
         .padding(.bottom, 16)
         .background(UnearthColor.surface)
-        .confirmationDialog("Report this gem?", isPresented: $showReportConfirm, titleVisibility: .visible) {
-            Button("Report", role: .destructive) {
-                Task { await submitReport() }
+        .confirmationDialog(
+            reportDialogTitle,
+            isPresented: Binding(
+                get: { reportTarget != nil },
+                set: { if !$0 { reportTarget = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Spam or scam", role: .destructive) {
+                Task { await submitReport(reason: "spam") }
             }
-            Button("Cancel", role: .cancel) {}
+            Button("Inappropriate", role: .destructive) {
+                Task { await submitReport(reason: "inappropriate") }
+            }
+            Button("Inaccurate or misleading", role: .destructive) {
+                Task { await submitReport(reason: "inaccurate") }
+            }
+            Button("Something else", role: .destructive) {
+                Task { await submitReport(reason: "other") }
+            }
+            Button("Cancel", role: .cancel) {
+                reportTarget = nil
+            }
+        }
+    }
+
+    private var reportDialogTitle: String {
+        switch reportTarget {
+        case .find: return "Report this find?"
+        case .gem, .none: return "Report this gem?"
         }
     }
 
@@ -416,11 +473,20 @@ struct GemDetailView: View {
         }
     }
 
-    private func submitReport() async {
+    private func submitReport(reason: String) async {
+        let target = reportTarget
+        reportTarget = nil
         do {
-            try await APIClient.shared.report(
-                ReportBody(gemId: gem.id, findId: nil, reason: "user_report")
-            )
+            switch target {
+            case .gem, .none:
+                try await APIClient.shared.report(
+                    ReportBody(gemId: gem.id, findId: nil, reason: reason)
+                )
+            case .find(let findId):
+                try await APIClient.shared.report(
+                    ReportBody(gemId: gem.id, findId: findId, reason: reason)
+                )
+            }
             toastMessage = "Thanks — we received your report"
         } catch {
             toastMessage = error.localizedDescription

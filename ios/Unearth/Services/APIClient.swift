@@ -191,9 +191,12 @@ actor APIClient {
     }
 
     func logout(refreshToken: String) async throws {
-        let _: EmptyResponse = try await post(
-            "/auth/logout",
-            body: LogoutBody(refreshToken: refreshToken)
+        let data = try encoder.encode(LogoutBody(refreshToken: refreshToken))
+        let _: EmptyResponse = try await request(
+            path: "/auth/logout",
+            method: "POST",
+            bodyData: data,
+            allowEmptyBody: true
         )
     }
 
@@ -288,7 +291,13 @@ actor APIClient {
     }
 
     func report(_ body: ReportBody) async throws {
-        let _: EmptyResponse = try await post("/reports", body: body)
+        let data = try encoder.encode(body)
+        let _: EmptyResponse = try await request(
+            path: "/reports",
+            method: "POST",
+            bodyData: data,
+            allowEmptyBody: true
+        )
     }
 
     // MARK: - Core request

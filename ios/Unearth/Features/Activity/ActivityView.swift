@@ -1,12 +1,17 @@
 import SwiftUI
 
 struct ActivityView: View {
-    var events: [ActivityEvent] = []
+    @State private var events: [ActivityEvent] = []
+    @State private var isLoading = false
+    @State private var loadError: String?
 
     var body: some View {
         NavigationStack {
             Group {
-                if events.isEmpty {
+                if isLoading, events.isEmpty {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if events.isEmpty {
                     emptyState
                 } else {
                     ScrollView {
@@ -36,6 +41,19 @@ struct ActivityView: View {
             .background(UnearthColor.formBackground.ignoresSafeArea())
             .navigationTitle("Activity")
             .navigationBarTitleDisplayMode(.inline)
+            .refreshable { await load() }
+            .task { await load() }
+            .overlay(alignment: .bottom) {
+                if let loadError, !events.isEmpty {
+                    Text(loadError)
+                        .font(UnearthFont.bodySmall())
+                        .foregroundStyle(UnearthColor.amber)
+                        .padding(8)
+                        .background(UnearthColor.amberTint)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .padding(.bottom, 12)
+                }
+            }
         }
     }
 
@@ -44,12 +62,21 @@ struct ActivityView: View {
             Image(systemName: "bell")
                 .font(.system(size: 36))
                 .foregroundStyle(UnearthColor.green)
-            Text("Nothing yet. Unearth your first gem.")
+            Text(loadError == nil
+                 ? "Nothing yet. Unearth your first gem."
+                 : (loadError ?? "Couldn’t load activity."))
                 .font(UnearthFont.body())
                 .foregroundStyle(UnearthColor.inkSecondary)
                 .multilineTextAlignment(.center)
                 .bodyLineSpacing()
                 .padding(.horizontal, 32)
+            if loadError != nil {
+                Button("Try again") {
+                    Task { await load() }
+                }
+                .font(UnearthFont.button())
+                .foregroundStyle(UnearthColor.green)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -69,12 +96,20 @@ struct ActivityView: View {
             .background(UnearthColor.greenTint.opacity(kind == .polished ? 1 : 0.6))
             .clipShape(Circle())
     }
+
+    private func load() async {
+        isLoading = true
+        loadError = nil
+        defer { isLoading = false }
+        do {
+            let response = try await APIClient.shared.activity()
+            events = response.events
+        } catch {
+            loadError = error.localizedDescription
+        }
+    }
 }
 
 #Preview("ActivityView") {
-    ActivityView(events: ActivityEvent.mocks)
-}
-
-#Preview("ActivityView empty") {
-    ActivityView(events: [])
+    ActivityView()
 }

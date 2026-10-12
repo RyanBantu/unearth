@@ -31,8 +31,38 @@ async function userStats(userId: string) {
 
 export async function meRoutes(app: FastifyInstance): Promise<void> {
   app.get("/me", { preHandler: requireAuth }, async (request) => {
-    const stats = await userStats(request.user.id);
-    return serializeUser(request.user, stats);
+    const userId = request.user.id;
+    const [stats, finds] = await Promise.all([
+      userStats(userId),
+      sql`
+        select
+          f.id, f.gem_id, f.user_id, f.description, f.liked, f.disliked,
+          f.tags, f.created_at,
+          g.name as gem_name,
+          (g.first_finder_id = ${userId}) as is_first_find
+        from finds f
+        join gems g on g.id = f.gem_id
+        where f.user_id = ${userId}
+        order by f.created_at desc
+      `,
+    ]);
+
+    return {
+      ...serializeUser(request.user, stats),
+      finds: finds.map((f) => ({
+        id: f.id,
+        gemId: f.gem_id,
+        gemName: f.gem_name,
+        userId: f.user_id,
+        handle: request.user.handle,
+        description: f.description,
+        liked: f.liked,
+        disliked: f.disliked,
+        tags: f.tags,
+        createdAt: f.created_at,
+        isFirstFind: Boolean(f.is_first_find),
+      })),
+    };
   });
 
   app.put("/me/handle", { preHandler: requireAuth }, async (request, reply) => {

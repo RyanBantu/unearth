@@ -1,12 +1,26 @@
 import SwiftUI
 
 struct ProfileView: View {
-    var user: User = .mock
+    var auth: AuthService
     var onSignOut: () -> Void = {}
     var onDeleteAccount: (() async -> Void)? = nil
 
+    @State private var user: User
     @State private var showDeleteConfirm = false
     @State private var isDeleting = false
+    @State private var isLoading = false
+    @State private var loadError: String?
+
+    init(
+        auth: AuthService,
+        onSignOut: @escaping () -> Void = {},
+        onDeleteAccount: (() async -> Void)? = nil
+    ) {
+        self.auth = auth
+        self.onSignOut = onSignOut
+        self.onDeleteAccount = onDeleteAccount
+        _user = State(initialValue: auth.currentUser ?? .mock)
+    }
 
     var body: some View {
         NavigationStack {
@@ -22,6 +36,8 @@ struct ProfileView: View {
             .background(UnearthColor.formBackground.ignoresSafeArea())
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
+            .refreshable { await reload() }
+            .task { await reload() }
             .alert("Delete account?", isPresented: $showDeleteConfirm) {
                 Button("Delete account", role: .destructive) {
                     Task {
@@ -32,7 +48,7 @@ struct ProfileView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This permanently deletes your account and finds. This cannot be undone.")
+                Text("This permanently deletes your account, finds, and stash, and revokes Sign in with Apple. This cannot be undone.")
             }
         }
     }
@@ -44,6 +60,17 @@ struct ProfileView: View {
                 .font(UnearthFont.sheetTitle())
                 .foregroundStyle(UnearthColor.ink)
             Badge(text: user.prospectorLevelLabel, variant: .polished)
+            if isLoading {
+                ProgressView()
+                    .scaleEffect(0.8)
+            }
+            if let loadError {
+                Text(loadError)
+                    .font(UnearthFont.bodySmall())
+                    .foregroundStyle(UnearthColor.amber)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 24)
@@ -51,7 +78,7 @@ struct ProfileView: View {
 
     private var stats: some View {
         VStack(spacing: 8) {
-            Text("\(user.gemsUnearthed) gems unearthed")
+            Text(user.gemsUnearthedLabel)
                 .font(UnearthFont.gemTitle(28))
                 .foregroundStyle(UnearthColor.ink)
                 .multilineTextAlignment(.center)
@@ -71,7 +98,7 @@ struct ProfileView: View {
                 .padding(.horizontal, 16)
 
             if user.finds.isEmpty {
-                Text("No finds yet.")
+                Text("No finds yet. Unearth a gem to get started.")
                     .font(UnearthFont.body())
                     .foregroundStyle(UnearthColor.inkSecondary)
                     .padding(.horizontal, 16)
@@ -137,8 +164,24 @@ struct ProfileView: View {
         }
         .padding(.horizontal, 16)
     }
+
+    private func reload() async {
+        isLoading = true
+        loadError = nil
+        defer { isLoading = false }
+        do {
+            let me = try await APIClient.shared.me()
+            user = me
+            auth.applyLoadedUser(me)
+        } catch {
+            loadError = error.localizedDescription
+            if let cached = auth.currentUser {
+                user = cached
+            }
+        }
+    }
 }
 
 #Preview("ProfileView") {
-    ProfileView()
+    ProfileView(auth: AuthService())
 }

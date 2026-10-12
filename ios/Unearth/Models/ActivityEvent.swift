@@ -37,7 +37,6 @@ struct ActivityEvent: Identifiable, Hashable, Codable {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
         kind = try container.decode(ActivityEventKind.self, forKey: .kind)
         gemName = try container.decode(String.self, forKey: .gemName)
         actorHandle = try container.decodeIfPresent(String.self, forKey: .actorHandle)
@@ -47,6 +46,24 @@ struct ActivityEvent: Identifiable, Hashable, Codable {
         } else {
             self.message = Self.defaultMessage(kind: kind, gemName: gemName, actorHandle: actorHandle)
         }
+        if let decodedId = try container.decodeIfPresent(UUID.self, forKey: .id) {
+            id = decodedId
+        } else {
+            let seed = "\(kind.rawValue)|\(gemName)|\(actorHandle ?? "")|\(createdAt.timeIntervalSince1970)"
+            id = Self.stableId(from: seed)
+        }
+    }
+
+    /// Deterministic UUID so list rows stay stable across refreshes when the API omits `id`.
+    static func stableId(from seed: String) -> UUID {
+        var hash: UInt64 = 5381
+        for byte in seed.utf8 {
+            hash = ((hash << 5) &+ hash) &+ UInt64(byte)
+        }
+        let a = UInt32(truncatingIfNeeded: hash)
+        let b = UInt32(truncatingIfNeeded: hash >> 32)
+        let string = String(format: "%08x-0000-4000-8000-%012x", a, UInt64(b))
+        return UUID(uuidString: string) ?? UUID()
     }
 
     func encode(to encoder: Encoder) throws {

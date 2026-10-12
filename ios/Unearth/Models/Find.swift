@@ -13,8 +13,96 @@ struct Find: Identifiable, Hashable, Codable {
     var disliked: [String]
     var tags: [String]
     /// Raw API strings (server stores a single optional string per find).
-    var likedText: String? = nil
-    var dislikedText: String? = nil
+    var likedText: String?
+    var dislikedText: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, gemId, gemName, userId, handle, createdAt
+        case note, description
+        case isFirstFind, liked, disliked, tags
+        case likedText, dislikedText
+    }
+
+    init(
+        id: UUID,
+        gemId: UUID,
+        gemName: String,
+        userId: UUID,
+        handle: String,
+        createdAt: Date,
+        note: String? = nil,
+        isFirstFind: Bool = false,
+        liked: [String] = [],
+        disliked: [String] = [],
+        tags: [String] = [],
+        likedText: String? = nil,
+        dislikedText: String? = nil
+    ) {
+        self.id = id
+        self.gemId = gemId
+        self.gemName = gemName
+        self.userId = userId
+        self.handle = handle
+        self.createdAt = createdAt
+        self.note = note
+        self.isFirstFind = isFirstFind
+        self.liked = liked
+        self.disliked = disliked
+        self.tags = tags
+        self.likedText = likedText
+        self.dislikedText = dislikedText
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        gemId = try c.decodeIfPresent(UUID.self, forKey: .gemId) ?? UUID()
+        gemName = try c.decodeIfPresent(String.self, forKey: .gemName) ?? ""
+        userId = try c.decodeIfPresent(UUID.self, forKey: .userId) ?? UUID()
+        handle = try c.decodeIfPresent(String.self, forKey: .handle) ?? ""
+        createdAt = try c.decodeIfPresent(Date.self, forKey: .createdAt) ?? .now
+        note = try c.decodeIfPresent(String.self, forKey: .note)
+            ?? c.decodeIfPresent(String.self, forKey: .description)
+        isFirstFind = try c.decodeIfPresent(Bool.self, forKey: .isFirstFind) ?? false
+        tags = try c.decodeIfPresent([String].self, forKey: .tags) ?? []
+
+        if let likedArr = try? c.decode([String].self, forKey: .liked) {
+            liked = likedArr
+            likedText = likedArr.first
+        } else if let likedStr = try c.decodeIfPresent(String.self, forKey: .liked) {
+            likedText = likedStr
+            liked = likedStr.isEmpty ? [] : [likedStr]
+        } else {
+            liked = []
+            likedText = try c.decodeIfPresent(String.self, forKey: .likedText)
+        }
+
+        if let dislikedArr = try? c.decode([String].self, forKey: .disliked) {
+            disliked = dislikedArr
+            dislikedText = dislikedArr.first
+        } else if let dislikedStr = try c.decodeIfPresent(String.self, forKey: .disliked) {
+            dislikedText = dislikedStr
+            disliked = dislikedStr.isEmpty ? [] : [dislikedStr]
+        } else {
+            disliked = []
+            dislikedText = try c.decodeIfPresent(String.self, forKey: .dislikedText)
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(gemId, forKey: .gemId)
+        try c.encode(gemName, forKey: .gemName)
+        try c.encode(userId, forKey: .userId)
+        try c.encode(handle, forKey: .handle)
+        try c.encode(createdAt, forKey: .createdAt)
+        try c.encodeIfPresent(note, forKey: .note)
+        try c.encode(isFirstFind, forKey: .isFirstFind)
+        try c.encode(liked, forKey: .liked)
+        try c.encode(disliked, forKey: .disliked)
+        try c.encode(tags, forKey: .tags)
+    }
 }
 
 extension Find {

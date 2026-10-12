@@ -14,7 +14,6 @@ struct HomeShellView: View {
     @State private var reopenGemAfterFind: UUID?
     @State private var toastMessage: String?
     @State private var stashGems: [Gem] = []
-    @State private var activityEvents: [ActivityEvent] = []
     @State private var stashReloadToken = 0
 
     var body: some View {
@@ -34,11 +33,10 @@ struct HomeShellView: View {
                 case .unearth:
                     digTab
                 case .activity:
-                    ActivityView(events: activityEvents)
-                        .task { await loadActivity() }
+                    ActivityView()
                 case .profile:
                     ProfileView(
-                        user: auth.currentUser ?? .mock,
+                        auth: auth,
                         onSignOut: { auth.signOut() },
                         onDeleteAccount: { await auth.deleteAccount() }
                     )
@@ -145,14 +143,6 @@ struct HomeShellView: View {
         }
     }
 
-    private func loadActivity() async {
-        do {
-            let response = try await APIClient.shared.activity()
-            activityEvents = response.events
-        } catch {
-            activityEvents = []
-        }
-    }
 }
 
 private struct PresentedGem: Identifiable, Hashable {

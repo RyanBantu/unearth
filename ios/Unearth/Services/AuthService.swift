@@ -187,6 +187,12 @@ final class AuthService {
         }
     }
 
+    /// Update in-memory + keychain user after Profile (or another screen) loads `/me`.
+    func applyLoadedUser(_ user: User) {
+        persist(user: user)
+        isAuthenticated = true
+    }
+
     // MARK: - Private
 
     private func storeTokens(access: String, refresh: String?) {
