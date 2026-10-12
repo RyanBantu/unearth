@@ -55,6 +55,7 @@ struct HomeShellView: View {
             UnearthView(
                 locationService: locationService,
                 linkedGem: linkedGemForFind,
+                currentHandle: auth.currentUser?.handle ?? "",
                 onDismiss: {
                     showUnearth = false
                     let wasAddingFind = linkedGemForFind != nil

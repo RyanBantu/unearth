@@ -24,6 +24,11 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Unearth uses your location while you Dig so nearby gems appear on the map and distances stay accurate.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>instagram</string>
+		<string>instagram-stories</string>
+	</array>
 	<key>UIAppFonts</key>
 	<array>
 		<string>BricolageGrotesque-Medium.ttf</string>

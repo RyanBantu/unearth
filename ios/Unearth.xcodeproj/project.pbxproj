@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0013A0176601E7009DACB4A5 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E53DB82A53CCF23E9A9E991 /* SignInView.swift */; };
+		0211CD9CC160959E064ED6C7 /* ShareOfferSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2749C7D365FE4FD3F101CA8 /* ShareOfferSheet.swift */; };
 		0D05EEC649C24515B797BF69 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACF63465BD82FB1FE5F4E22 /* User.swift */; };
 		0E21EB00B31BBFB087460F2E /* ActivityEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14080EDFBF95D9D930C50F7C /* ActivityEvent.swift */; };
 		15ADDA26173E2BBFF0887064 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 076561CF35381F0E70DC1B36 /* APIModels.swift */; };
@@ -45,7 +46,9 @@
 		D9A881FFACCD3CE1BAF633F9 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 655726F68DE05DFC7272F997 /* Category.swift */; };
 		E41AF36A99B80E49BFD97C49 /* PlaceSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1800026F5C3D28D48868B756 /* PlaceSearchService.swift */; };
 		EBF743E1BCAF99CF13ECCB85 /* RoundIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B8EC344CA7973274C2155D /* RoundIconButton.swift */; };
+		EDF557A3F1491161AA530508 /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE60E3F38526CE93BB100AE /* ShareCardView.swift */; };
 		F0EE8F7786EDEDEBCA1FA93C /* GemPinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A048782079ECEA307A04FF /* GemPinView.swift */; };
+		F68DC0CB5A95103D0C973E70 /* ShareCardRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F37CA9D0FEA4ED4CDF417C6 /* ShareCardRenderer.swift */; };
 		F69D2A579E5ABB3D452934BF /* DigViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42ABBBE511D9BD7CD6915092 /* DigViewModel.swift */; };
 		F7F1D04FD8CE8E4F17B682E1 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B905DD6FAD1C3D82EEC4D52A /* RootView.swift */; };
 		F86F94B0A8FC92461B30D419 /* Find.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FBE0FEEC407F810EF501B12 /* Find.swift */; };
@@ -76,6 +79,7 @@
 		42ABBBE511D9BD7CD6915092 /* DigViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DigViewModel.swift; sourceTree = "<group>"; };
 		47B28F5915F1D6E26A40BBD2 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		4C7DD063BCD904E797178190 /* StashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StashView.swift; sourceTree = "<group>"; };
+		4F37CA9D0FEA4ED4CDF417C6 /* ShareCardRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardRenderer.swift; sourceTree = "<group>"; };
 		62AC82713E081332F290E05E /* UnearthLogo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnearthLogo.swift; sourceTree = "<group>"; };
 		655726F68DE05DFC7272F997 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		6B5B3665C5E331619BBFAE73 /* MatchCandidate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchCandidate.swift; sourceTree = "<group>"; };
@@ -95,12 +99,14 @@
 		AEEE33628064361C7560BAC4 /* DigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DigView.swift; sourceTree = "<group>"; };
 		B06EE049D01B49F3202B651F /* PickHandleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickHandleView.swift; sourceTree = "<group>"; };
 		B905DD6FAD1C3D82EEC4D52A /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		C2749C7D365FE4FD3F101CA8 /* ShareOfferSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareOfferSheet.swift; sourceTree = "<group>"; };
 		CCA87590435BFB6DC51486F5 /* TagChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagChip.swift; sourceTree = "<group>"; };
 		D19D697ACA839E97B29AE825 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
 		DACF63465BD82FB1FE5F4E22 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		E7BD346328B8A99B0F7E705E /* UnearthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnearthViewModel.swift; sourceTree = "<group>"; };
 		E967D5CE59939352E4B4B444 /* GemDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GemDetailView.swift; sourceTree = "<group>"; };
 		F18A4593545C190882F28D97 /* Gem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gem.swift; sourceTree = "<group>"; };
+		FDE60E3F38526CE93BB100AE /* ShareCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -167,6 +173,7 @@
 				D99017FB62A5C11CC185788C /* GemDetail */,
 				B6A7D994F65E97C7CF470E8D /* Onboarding */,
 				F56E63913F54E713452C0672 /* Profile */,
+				8F587E911025F97554F93A1C /* Share */,
 				18F9106EFE56C929CEA0B581 /* Stash */,
 				6A5B80CB11756FDBCB2EE489 /* Unearth */,
 			);
@@ -209,6 +216,16 @@
 				33D9069685394D23B9EC66F7 /* MainTabBar.swift */,
 			);
 			path = Dig;
+			sourceTree = "<group>";
+		};
+		8F587E911025F97554F93A1C /* Share */ = {
+			isa = PBXGroup;
+			children = (
+				4F37CA9D0FEA4ED4CDF417C6 /* ShareCardRenderer.swift */,
+				FDE60E3F38526CE93BB100AE /* ShareCardView.swift */,
+				C2749C7D365FE4FD3F101CA8 /* ShareOfferSheet.swift */,
+			);
+			path = Share;
 			sourceTree = "<group>";
 		};
 		A119510603BD44DEEE12B2D1 /* Unearth */ = {
@@ -374,6 +391,9 @@
 				F7F1D04FD8CE8E4F17B682E1 /* RootView.swift in Sources */,
 				EBF743E1BCAF99CF13ECCB85 /* RoundIconButton.swift in Sources */,
 				4A5444F183597B4A328D3633 /* Shadows.swift in Sources */,
+				F68DC0CB5A95103D0C973E70 /* ShareCardRenderer.swift in Sources */,
+				EDF557A3F1491161AA530508 /* ShareCardView.swift in Sources */,
+				0211CD9CC160959E064ED6C7 /* ShareOfferSheet.swift in Sources */,
 				0013A0176601E7009DACB4A5 /* SignInView.swift in Sources */,
 				D4693FFB85A2BDF885FACE86 /* StashView.swift in Sources */,
 				25C83047C6D7E1AB15CB673B /* TagChip.swift in Sources */,

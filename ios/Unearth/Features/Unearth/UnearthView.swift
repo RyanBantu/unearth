@@ -4,10 +4,14 @@ import SwiftUI
 struct UnearthView: View {
     var locationService: LocationService? = nil
     var linkedGem: Gem? = nil
+    /// Current user’s handle — shown on the share card as Unearthed by @handle.
+    var currentHandle: String = ""
     var onDismiss: (() -> Void)? = nil
     var onSuccess: ((String, Gem?) -> Void)? = nil
 
     @State private var viewModel: UnearthViewModel
+    @State private var pendingShare: ShareOfferPayload?
+    @State private var pendingSuccessMessage: String?
     @FocusState private var focusedField: FieldFocus?
 
     private enum FieldFocus: Hashable {
@@ -17,11 +21,13 @@ struct UnearthView: View {
     init(
         locationService: LocationService? = nil,
         linkedGem: Gem? = nil,
+        currentHandle: String = "",
         onDismiss: (() -> Void)? = nil,
         onSuccess: ((String, Gem?) -> Void)? = nil
     ) {
         self.locationService = locationService
         self.linkedGem = linkedGem
+        self.currentHandle = currentHandle
         self.onDismiss = onDismiss
         self.onSuccess = onSuccess
         _viewModel = State(initialValue: UnearthViewModel(linkedGem: linkedGem))
@@ -72,7 +78,21 @@ struct UnearthView: View {
                     viewModel.centerOnUser(locationService?.currentLocation)
                 }
             }
+            .fullScreenCover(item: $pendingShare) { payload in
+                ShareOfferSheet(payload: payload) {
+                    finishAfterShare()
+                }
+            }
         }
+    }
+
+    private func finishAfterShare() {
+        let message = pendingSuccessMessage ?? "Gem unearthed"
+        let gem = viewModel.lastSubmittedGem
+        pendingShare = nil
+        pendingSuccessMessage = nil
+        onSuccess?(message, gem)
+        onDismiss?()
     }
 
     // MARK: - Existing gem
@@ -448,9 +468,7 @@ struct UnearthView: View {
             ) {
                 Task {
                     if let message = await viewModel.submit() {
-                        onSuccess?(message, viewModel.lastSubmittedGem)
-                        try? await Task.sleep(nanoseconds: 600_000_000)
-                        onDismiss?()
+                        offerShare(successMessage: message)
                     }
                 }
             }
@@ -459,6 +477,29 @@ struct UnearthView: View {
             .padding(.bottom, 12)
         }
         .background(UnearthColor.formBackground)
+    }
+
+    private func offerShare(successMessage: String) {
+        guard let gem = viewModel.lastSubmittedGem else {
+            onSuccess?(successMessage, nil)
+            onDismiss?()
+            return
+        }
+
+        // Prefer the signed-in prospector — they’re the one sharing the find.
+        let handle = currentHandle.isEmpty
+            ? (gem.unearthedByHandle ?? gem.firstFinderHandle ?? "you")
+            : currentHandle
+
+        pendingSuccessMessage = successMessage
+        pendingShare = ShareOfferPayload(
+            gemName: gem.name,
+            categoryName: gem.category.displayName,
+            unearthedByHandle: handle,
+            coordinate: gem.coordinate,
+            successMessage: successMessage,
+            gem: gem
+        )
     }
 }
 
