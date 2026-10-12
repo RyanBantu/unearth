@@ -1,12 +1,9 @@
-# App Store / TestFlight screenshots
+# App Store assets
 
-Ready for App Store Connect (iPhone 6.9" — 1320×2868):
+## Screenshots — iPhone Dynamic Island (medium)
+- `01-onboarding.png` — 1179 × 2556
+- `02-dig.png` — 1179 × 2556
 
-- `appstore/01-onboarding.png` — Sign in
-- `appstore/02-dig.png` — Dig map + nearby sheet
-
-Upload in App Store Connect → your app → App Store → iOS Preview → Screenshots,
-or TestFlight → Test Information (optional).
-
-Path on disk:
-`ios/screenshots/appstore/`
+## Header asset (Product Page → Header)
+- `header-3840x1646.png` — 3840 × 1646
+- `header-5244x2950.png` — 5244 × 2950
