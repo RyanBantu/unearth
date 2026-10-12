@@ -26,7 +26,7 @@ targets:
       - path: Unearth/Assets.xcassets
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.unearth.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.ryanbantu.unearth
         PRODUCT_NAME: Unearth
         INFOPLIST_FILE: Unearth/Info.plist
         CODE_SIGN_ENTITLEMENTS: Unearth/Unearth.entitlements

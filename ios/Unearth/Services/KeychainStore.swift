@@ -2,7 +2,7 @@ import Foundation
 import Security
 
 enum KeychainStore {
-    private static let service = "com.unearth.app"
+    private static let service = "com.ryanbantu.unearth"
 
     enum Keys {
         static let accessToken = "auth.accessToken"

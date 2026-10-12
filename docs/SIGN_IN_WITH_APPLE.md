@@ -1,18 +1,19 @@
 # Sign in with Apple setup
 
-Bundle ID: **`com.unearth.app`**
+Bundle ID: **`com.ryanbantu.unearth`**  
+Team ID: **`8XCCGLJ4KA`**
 
 ## 1. Apple Developer — App ID
 
 1. Open [Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources/identifiers/list)
-2. **Identifiers** → select (or create) App ID `com.unearth.app`
+2. **Identifiers** → select (or create) App ID `com.ryanbantu.unearth`
 3. Enable **Sign In with Apple** → Save
 
 ## 2. Apple Developer — Sign in with Apple key
 
 1. **Keys** → **+**
 2. Name it e.g. `Unearth SIWA`
-3. Enable **Sign in with Apple** → Configure → choose App ID `com.unearth.app`
+3. Enable **Sign in with Apple** → Configure → choose App ID `com.ryanbantu.unearth`
 4. Continue → Register → **Download** the `.p8` file (once only)
 5. Note:
    - **Key ID** (10 chars on the key page)
@@ -37,7 +38,7 @@ open Unearth.xcodeproj
 
 | Variable | Value |
 |---|---|
-| `APPLE_BUNDLE_ID` | `com.unearth.app` |
+| `APPLE_BUNDLE_ID` | `com.ryanbantu.unearth` |
 | `APPLE_TEAM_ID` | Your 10-character Team ID |
 | `APPLE_KEY_ID` | Key ID from step 2 |
 | `APPLE_PRIVATE_KEY` | Full PEM contents of the `.p8`, with `\n` for newlines in a single-line env value |
@@ -78,7 +79,7 @@ In the app: tap **Sign in with Apple** (not mock). You should land on **Pick a h
 | Symptom | Fix |
 |---|---|
 | Capability missing / signing error | Team selected + App ID has SIWA enabled |
-| `Invalid Apple identity token` | `APPLE_BUNDLE_ID` must be exactly `com.unearth.app` |
+| `Invalid Apple identity token` | `APPLE_BUNDLE_ID` must be exactly `com.ryanbantu.unearth` |
 | `Apple authorization code exchange failed` | Wrong Key ID / Team ID / private key, or key not linked to this App ID |
 | Works once then fails | Normal — Apple only sends name/email the first time; server already stores them |
 
