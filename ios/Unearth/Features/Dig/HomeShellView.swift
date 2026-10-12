@@ -58,16 +58,16 @@ struct HomeShellView: View {
                     showUnearth = false
                     linkedGemForFind = nil
                     toastMessage = message
+                    selectedTab = .dig
                     if let gem {
                         digViewModel.selectNewlyUnearthed(gem)
-                        selectedTab = .dig
                     }
                 }
             )
         }
         .fullScreenCover(item: $presentedGem) { gem in
             GemDetailHost(
-                gem: gem,
+                gemId: gem.id,
                 userLocation: locationService.currentLocation,
                 onClose: { presentedGem = nil },
                 onFoundItToo: { foundGem in
@@ -87,10 +87,14 @@ struct HomeShellView: View {
             placeSearch: placeSearch,
             onOpenGem: { presentedGem = $0 }
         )
-        .task(id: locationService.currentLocation?.coordinate.latitude) {
+        .task {
+            // Initial load; further fetches happen on map camera settle.
             let loc = locationService.currentLocation
             let lat = loc?.coordinate.latitude ?? 12.9716
             let lng = loc?.coordinate.longitude ?? 77.5946
+            if loc != nil {
+                digViewModel.centerOnUser(loc)
+            }
             await digViewModel.loadNearby(lat: lat, lng: lng)
         }
     }
@@ -100,7 +104,7 @@ struct HomeShellView: View {
             let response = try await APIClient.shared.stash()
             stashGems = response.gems.map { $0.toGem() }
         } catch {
-            // Keep previous / empty
+            stashGems = []
         }
     }
 
@@ -109,20 +113,22 @@ struct HomeShellView: View {
             let response = try await APIClient.shared.activity()
             activityEvents = response.events
         } catch {
-            // Keep previous / empty
+            activityEvents = []
         }
     }
 }
 
-/// Loads full gem detail from the API, then shows GemDetailView.
+/// Loads gem detail exclusively from `GET /gems/:id`.
 private struct GemDetailHost: View {
-    let gem: Gem
+    let gemId: UUID
     var userLocation: CLLocation?
     var onClose: () -> Void
     var onFoundItToo: (Gem) -> Void
     var onStashChanged: () -> Void
 
     @State private var detail: Gem?
+    @State private var errorMessage: String?
+    @State private var isLoading = true
 
     var body: some View {
         Group {
@@ -134,18 +140,42 @@ private struct GemDetailHost: View {
                     onFoundItToo: onFoundItToo,
                     onStashChanged: onStashChanged
                 )
-            } else {
+            } else if isLoading {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(UnearthColor.formBackground.ignoresSafeArea())
+            } else {
+                VStack(spacing: 16) {
+                    Text(errorMessage ?? "Couldn’t load this gem.")
+                        .font(UnearthFont.body())
+                        .foregroundStyle(UnearthColor.inkSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                    Button("Try again") {
+                        Task { await load() }
+                    }
+                    .font(UnearthFont.button())
+                    .foregroundStyle(UnearthColor.green)
+                    Button("Close", action: onClose)
+                        .font(UnearthFont.label())
+                        .foregroundStyle(UnearthColor.inkSecondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(UnearthColor.formBackground.ignoresSafeArea())
             }
         }
-        .task {
-            do {
-                detail = try await APIClient.shared.gem(id: gem.id)
-            } catch {
-                detail = gem
-            }
+        .task { await load() }
+    }
+
+    private func load() async {
+        isLoading = true
+        errorMessage = nil
+        defer { isLoading = false }
+        do {
+            detail = try await APIClient.shared.gem(id: gemId)
+        } catch {
+            detail = nil
+            errorMessage = error.localizedDescription
         }
     }
 }

@@ -89,14 +89,16 @@ struct EmptyResponse: Decodable {}
 actor APIClient {
     static let shared = APIClient()
 
-    /// Set `USE_LOCAL_API=1` in the scheme env to hit localhost in DEBUG.
+    /// RELEASE always uses Render. DEBUG also uses Render unless `USE_LOCAL_API=1`.
     var baseURL: URL {
         #if DEBUG
         if ProcessInfo.processInfo.environment["USE_LOCAL_API"] == "1" {
             return URL(string: "http://localhost:3000")!
         }
-        #endif
         return URL(string: "https://unearth-1o4a.onrender.com")!
+        #else
+        return URL(string: "https://unearth-1o4a.onrender.com")!
+        #endif
     }
 
     private var accessToken: String?

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct StashView: View {
-    var gems: [Gem] = Gem.mockGems
+    var gems: [Gem] = []
     var onOpenGem: (Gem) -> Void = { _ in }
 
     var body: some View {
@@ -55,7 +55,7 @@ struct StashView: View {
 }
 
 #Preview("StashView") {
-    StashView()
+    StashView(gems: Gem.mockGems)
 }
 
 #Preview("StashView empty") {

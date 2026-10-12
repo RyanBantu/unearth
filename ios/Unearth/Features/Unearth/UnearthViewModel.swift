@@ -296,6 +296,7 @@ final class UnearthViewModel {
             applePlaceId: applePlaceId,
             googleMapsUrl: maps.isEmpty ? nil : maps,
             address: nil,
+            // After the user dismisses duplicate candidates, assert this is a new place.
             confirmedNew: dismissedCandidateIds.isEmpty ? nil : true
         )
 
@@ -306,9 +307,10 @@ final class UnearthViewModel {
             toastMessage = message
             return message
         } catch APIError.conflict(let candidates) {
+            // Spec: show “Is this the same place?” banner with server candidates.
             matchCandidates = candidates
             dismissedCandidateIds = []
-            toastMessage = "Is this the same place?"
+            toastMessage = nil
             return nil
         } catch {
             toastMessage = error.localizedDescription

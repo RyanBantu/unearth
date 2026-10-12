@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ActivityView: View {
-    var events: [ActivityEvent] = ActivityEvent.mocks
+    var events: [ActivityEvent] = []
 
     var body: some View {
         NavigationStack {
@@ -72,7 +72,7 @@ struct ActivityView: View {
 }
 
 #Preview("ActivityView") {
-    ActivityView()
+    ActivityView(events: ActivityEvent.mocks)
 }
 
 #Preview("ActivityView empty") {

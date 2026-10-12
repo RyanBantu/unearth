@@ -65,6 +65,9 @@ struct DigView: View {
         // `emphasis:` is unavailable — fall back to flat standard + no POIs.
         .modifier(DigMapStyleModifier())
         .mapControlVisibility(.hidden)
+        .onMapCameraChange(frequency: .onEnd) { context in
+            viewModel.onMapCameraSettled(context.region)
+        }
     }
 
     // MARK: - Top overlay
@@ -227,7 +230,11 @@ struct DigView: View {
                 .buttonStyle(.plain)
             }
 
-            if let gem = viewModel.sheetGem(userLocation: locationService.currentLocation) {
+            if viewModel.isLoadingNearby, viewModel.gems.isEmpty {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+            } else if let gem = viewModel.sheetGem(userLocation: locationService.currentLocation) {
                 GemCard(
                     gem: gem,
                     userLocation: locationService.currentLocation
@@ -235,7 +242,9 @@ struct DigView: View {
                     onOpenGem(gem)
                 }
             } else {
-                Text("No gems match this filter.")
+                Text(viewModel.loadError == nil
+                     ? "No gems near here yet. Unearth the first one."
+                     : (viewModel.loadError ?? "Couldn’t load gems."))
                     .font(UnearthFont.body())
                     .foregroundStyle(UnearthColor.inkSecondary)
             }
@@ -308,7 +317,7 @@ private struct DigMapStyleModifier: ViewModifier {
 
 #Preview("DigView") {
     DigView(
-        viewModel: DigViewModel(),
+        viewModel: DigViewModel.previewLoaded(),
         locationService: LocationService(),
         placeSearch: PlaceSearchService(),
         onOpenGem: { _ in }
