@@ -263,6 +263,11 @@ struct UnearthView: View {
             Text("Category")
                 .font(UnearthFont.label())
                 .foregroundStyle(UnearthColor.ink)
+            if viewModel.category == nil {
+                Text("Required — pick one to enable Unearth")
+                    .font(UnearthFont.bodySmall())
+                    .foregroundStyle(UnearthColor.amber)
+            }
 
             FlowChips {
                 ForEach(viewModel.visibleCategories) { item in
@@ -293,6 +298,11 @@ struct UnearthView: View {
             Text("Why it's a gem")
                 .font(UnearthFont.label())
                 .foregroundStyle(UnearthColor.ink)
+            Text("Required · at least 10 characters")
+                .font(UnearthFont.bodySmall())
+                .foregroundStyle(
+                    viewModel.isDescriptionValid ? UnearthColor.inkSecondary : UnearthColor.amber
+                )
 
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $viewModel.description)
@@ -423,6 +433,14 @@ struct UnearthView: View {
     private var bottomBar: some View {
         VStack(spacing: 0) {
             UnearthColor.divider.frame(height: 1)
+            if !viewModel.isFormValid {
+                Text(viewModel.validationHints.joined(separator: " · "))
+                    .font(UnearthFont.bodySmall())
+                    .foregroundStyle(UnearthColor.amber)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+            }
             PrimaryButton(
                 title: "Unearth",
                 isLarge: true,

@@ -75,18 +75,41 @@ final class UnearthViewModel {
     }
 
     var isFormValid: Bool {
-        if isExistingGemMode {
-            return isDescriptionValid && isGoogleMapsURLValid && selectedTags.count <= 5
-                && liked.count <= 140 && disliked.count <= 140
+        validationHints.isEmpty
+    }
+
+    /// Human-readable reasons the Unearth button is disabled.
+    var validationHints: [String] {
+        var hints: [String] = []
+        if !isExistingGemMode {
+            if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                hints.append("Add a name")
+            }
+            if category == nil {
+                hints.append("Pick a category")
+            }
         }
-        let nameOk = !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        return nameOk
-            && category != nil
-            && isDescriptionValid
-            && isGoogleMapsURLValid
-            && selectedTags.count <= 5
-            && liked.count <= 140
-            && disliked.count <= 140
+        if !isDescriptionValid {
+            let count = description.trimmingCharacters(in: .whitespacesAndNewlines).count
+            if count < 10 {
+                hints.append("“Why it's a gem” needs at least 10 characters (\(count)/10)")
+            } else {
+                hints.append("“Why it's a gem” is too long (max 600)")
+            }
+        }
+        if liked.count > 140 {
+            hints.append("Liked is too long (max 140)")
+        }
+        if disliked.count > 140 {
+            hints.append("Didn't like is too long (max 140)")
+        }
+        if selectedTags.count > 5 {
+            hints.append("Pick at most 5 tags")
+        }
+        if !isGoogleMapsURLValid {
+            hints.append("Google Maps link isn’t a valid Maps URL")
+        }
+        return hints
     }
 
     private var matchTask: Task<Void, Never>?
@@ -319,20 +342,20 @@ final class UnearthViewModel {
     }
 
     static func isValidGoogleMapsURL(_ string: String) -> Bool {
-        guard let url = URL(string: string), let host = url.host?.lowercased() else { return false }
-        let allowed = [
-            "maps.google.com",
-            "www.google.com",
-            "google.com",
-            "maps.app.goo.gl",
-            "goo.gl",
-        ]
-        if allowed.contains(where: { host == $0 || host.hasSuffix(".\($0)") }) {
-            if host.contains("google") {
-                return string.lowercased().contains("maps") || host.contains("maps")
-            }
+        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: trimmed), let host = url.host?.lowercased() else { return false }
+
+        // Short links from the Google Maps app
+        if host == "maps.app.goo.gl" || host == "goo.gl" || host.hasSuffix(".app.goo.gl") {
             return true
         }
-        return host.contains("google") && string.lowercased().contains("maps")
+        // google.com/maps, maps.google.com, regional google.*/maps
+        if host == "maps.google.com" || host.hasPrefix("maps.google.") {
+            return true
+        }
+        if host == "google.com" || host.hasSuffix(".google.com") || host.hasPrefix("www.google.") {
+            return trimmed.lowercased().contains("/maps") || trimmed.lowercased().contains("maps")
+        }
+        return host.contains("google") && trimmed.lowercased().contains("maps")
     }
 }
