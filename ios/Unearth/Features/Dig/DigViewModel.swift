@@ -27,6 +27,21 @@ final class DigViewModel {
     private var lastFetchRadiusM: Int = 5_000
     private var refetchTask: Task<Void, Never>?
 
+    #if DEBUG
+    private var isScreenshotDemo: Bool {
+        ProcessInfo.processInfo.arguments.contains("-screenshotDemo")
+    }
+    #endif
+
+    init() {
+        #if DEBUG
+        if isScreenshotDemo {
+            gems = Gem.mockGems
+            selectedGem = Gem.mockGems.first
+        }
+        #endif
+    }
+
     var filteredGems: [Gem] {
         guard let selectedCategory else { return gems }
         return gems.filter { $0.category == selectedCategory }
@@ -178,19 +193,30 @@ final class DigViewModel {
             )
             let mapped = response.gems.map { $0.toGem() }
             gems = mapped
+            #if DEBUG
+            if mapped.isEmpty, isScreenshotDemo {
+                gems = Gem.mockGems
+            }
+            #endif
             if let selected = selectedGem,
-               let refreshed = mapped.first(where: { $0.id == selected.id }) {
+               let refreshed = gems.first(where: { $0.id == selected.id }) {
                 selectedGem = refreshed
             } else if selectedGem == nil {
                 selectedGem = nearestGem(from: CLLocation(latitude: lat, longitude: lng))
             } else if let selected = selectedGem,
-                      !mapped.contains(where: { $0.id == selected.id }) {
+                      !gems.contains(where: { $0.id == selected.id }) {
                 // Selection left the viewport — keep it until user taps elsewhere.
                 _ = selected
             }
         } catch {
             loadError = error.localizedDescription
-            // Do not reinstate mock gems — keep last live list or empty.
+            #if DEBUG
+            if isScreenshotDemo {
+                gems = Gem.mockGems
+                selectedGem = Gem.mockGems.first
+                loadError = nil
+            }
+            #endif
         }
     }
 

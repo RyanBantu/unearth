@@ -19,6 +19,7 @@
 		22A748D8992E1A9CECD9C279 /* Gem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F18A4593545C190882F28D97 /* Gem.swift */; };
 		25C83047C6D7E1AB15CB673B /* TagChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCA87590435BFB6DC51486F5 /* TagChip.swift */; };
 		2790DA07E5B971AD5D5F0189 /* MatchCandidate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5B3665C5E331619BBFAE73 /* MatchCandidate.swift */; };
+		2BC248FC45085318613EBE65 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 01452C441C132DAE03D53B94 /* Assets.xcassets */; };
 		396CBEC8CD42C09F735858BA /* UnearthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7BD346328B8A99B0F7E705E /* UnearthViewModel.swift */; };
 		48D961E67D586F39E41081A9 /* Chip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9120316D91BF39A4BCBF89 /* Chip.swift */; };
 		4A5444F183597B4A328D3633 /* Shadows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80C70C906423387F6C40D177 /* Shadows.swift */; };
@@ -60,6 +61,7 @@
 /* Begin PBXFileReference section */
 		0083A213A793C6B0A592BA8D /* Unearth.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Unearth.entitlements; sourceTree = "<group>"; };
 		00A048782079ECEA307A04FF /* GemPinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GemPinView.swift; sourceTree = "<group>"; };
+		01452C441C132DAE03D53B94 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		03B98493B09F45DCED59FBDD /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		076561CF35381F0E70DC1B36 /* APIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIModels.swift; sourceTree = "<group>"; };
 		0ADBDEBE90DEA77022655637 /* Unearth.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Unearth.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -240,6 +242,7 @@
 				1D91AC52C8DA712244AB1625 /* Models */,
 				A79EFF6D791831B8E1203BB5 /* Resources */,
 				002FE7C84BB608E39DF96905 /* Services */,
+				01452C441C132DAE03D53B94 /* Assets.xcassets */,
 				A1D01439C0187B015C4A6C37 /* Info.plist */,
 				0083A213A793C6B0A592BA8D /* Unearth.entitlements */,
 			);
@@ -313,6 +316,7 @@
 			buildConfigurationList = 7079F0EF67D9053A55A6CF63 /* Build configuration list for PBXNativeTarget "Unearth" */;
 			buildPhases = (
 				03B622526C0141E2FBE755C4 /* Sources */,
+				7873094C3D19AC451DB539A0 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -334,6 +338,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					D594B0531CA59C02695ED567 = {
+						DevelopmentTeam = 8XCCGLJ4KA;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = 61128A946B52FAF1BE22F16A /* Build configuration list for PBXProject "Unearth" */;
@@ -354,6 +362,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7873094C3D19AC451DB539A0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2BC248FC45085318613EBE65 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		03B622526C0141E2FBE755C4 /* Sources */ = {
@@ -419,9 +438,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Unearth/Unearth.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = 8XCCGLJ4KA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Unearth/Info.plist;
@@ -444,9 +466,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Unearth/Unearth.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = 8XCCGLJ4KA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Unearth/Info.plist;

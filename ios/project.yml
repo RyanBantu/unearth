@@ -19,13 +19,19 @@ targets:
       - path: Unearth
         excludes:
           - "**/.DS_Store"
-          - Resources/Fonts
-          - Resources/Brand
-          - Assets.xcassets
+          - "Resources/Fonts/**"
+          - "Resources/Brand/**"
     resources:
-      - path: Unearth/Resources/Fonts
-      - path: Unearth/Resources/Brand
       - path: Unearth/Assets.xcassets
+      - path: Unearth/Resources/Fonts
+        type: folder
+      - path: Unearth/Resources/Brand
+        type: folder
+      - path: Unearth/Resources/Fonts/BricolageGrotesque-Bold.ttf
+      - path: Unearth/Resources/Fonts/BricolageGrotesque-Medium.ttf
+      - path: Unearth/Resources/Fonts/DMSans-Regular.ttf
+      - path: Unearth/Resources/Fonts/DMSans-Medium.ttf
+      - path: Unearth/Resources/Fonts/DMSans-SemiBold.ttf
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ryanbantu.unearth
@@ -33,11 +39,12 @@ targets:
         INFOPLIST_FILE: Unearth/Info.plist
         CODE_SIGN_ENTITLEMENTS: Unearth/Unearth.entitlements
         GENERATE_INFOPLIST_FILE: false
-        CURRENT_PROJECT_VERSION: 2
+        CURRENT_PROJECT_VERSION: 3
         MARKETING_VERSION: "1.0"
         DEVELOPMENT_TEAM: 8XCCGLJ4KA
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         SWIFT_EMIT_LOC_STRINGS: YES
         ENABLE_PREVIEWS: YES
