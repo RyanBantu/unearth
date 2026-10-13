@@ -2,12 +2,10 @@
 
 ## What’s ready locally
 
-- Release **archive** + **App Store IPA** built for `com.ryanbantu.unearth` (version **1.0**, build **2**)
+- Latest upload: version **1.0**, build **4** (voting + delete find)
 - Archive: `ios/build/Unearth.xcarchive`
 - IPA: `ios/build/export/Unearth.ipa`
 - Export compliance: `ITSAppUsesNonExemptEncryption = false` in Info.plist
-
-Upload failed because **there is no App Store Connect app record** for `com.ryanbantu.unearth` yet.
 
 ## 1. Create the app (one-time)
 
