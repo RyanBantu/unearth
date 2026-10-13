@@ -82,6 +82,15 @@ struct ActivityView: View {
     }
 
     private func load() async {
+        #if DEBUG
+        if ScreenshotScene.isDemo {
+            events = ActivityEvent.mocks
+            isLoading = false
+            hasLoadedOnce = true
+            loadError = nil
+            return
+        }
+        #endif
         isLoading = true
         loadError = nil
         defer {

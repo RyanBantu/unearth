@@ -2,7 +2,7 @@
 
 ## What’s ready locally
 
-- Latest upload: version **1.0**, build **4** (voting + delete find)
+- Latest upload: version **1.0**, build **6** (fix 400 on delete find / unstash / unvote / delete account)
 - Archive: `ios/build/Unearth.xcarchive`
 - IPA: `ios/build/export/Unearth.ipa`
 - Export compliance: `ITSAppUsesNonExemptEncryption = false` in Info.plist
