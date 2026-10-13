@@ -23,12 +23,13 @@
     { "source": "/lists/:city/:kind", "destination": "/api/page" },
     { "source": "/:city/:area/:category", "destination": "/api/page" },
     { "source": "/:city/:area", "destination": "/api/page" },
-    { "source": "/:city", "destination": "/api/page" },
-    { "source": "/{*path}", "destination": "/index.html" }
+    { "source": "/:city", "destination": "/api/page" }
   ],
   "functions": {
-    "api/page.ts": { "includeFiles": "dist/index.html" },
-    "api/og/[...path].tsx": { "includeFiles": "api/_fonts/**" },
-    "api/sitemap.ts": {}
+    "api/page.ts": {
+      "includeFiles": "dist/index.html",
+      "maxDuration": 10
+    },
+    "api/og/[...path].tsx": { "includeFiles": "api/_fonts/**" }
   }
 }

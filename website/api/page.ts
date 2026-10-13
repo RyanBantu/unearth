@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import {
   CATEGORY_FROM_SEGMENT,
   CATEGORY_PHRASE,
@@ -46,7 +47,15 @@ type PlacePage = {
 type Profile = { user: { handle: string | null; gemsUnearthed?: number } }
 
 function indexHtml(): string {
-  const candidates = [join(process.cwd(), 'dist/index.html'), join(process.cwd(), 'index.html')]
+  // vercel.json includeFiles: "dist/index.html" lands at the function root
+  // (page.func/index.html, cwd /var/task). Local Vite keeps it in dist/.
+  const here = dirname(fileURLToPath(import.meta.url))
+  const candidates = [
+    join(process.cwd(), 'index.html'),
+    join(here, '../index.html'),
+    join(process.cwd(), 'dist/index.html'),
+    join(here, '../dist/index.html'),
+  ]
   for (const file of candidates) {
     try {
       return readFileSync(file, 'utf8')
@@ -55,6 +64,23 @@ function indexHtml(): string {
     }
   }
   return fallbackHtml()
+}
+
+/** Vercel turns `/g/:slug` into `/api/page?slug=`; keep the public path too. */
+function routeParts(url: URL): string[] {
+  const parts = url.pathname.split('/').filter(Boolean)
+  if (parts[0] !== 'api' || parts[1] !== 'page') return parts
+
+  const q = url.searchParams
+  const slug = q.get('slug')
+  if (slug) return ['g', slug]
+  const handle = q.get('handle')
+  if (handle) return ['u', handle]
+  const city = q.get('city')
+  const kind = q.get('kind')
+  if (city && kind) return ['lists', city, kind]
+  if (city) return [city, q.get('area'), q.get('category')].filter((p): p is string => Boolean(p))
+  return parts
 }
 
 function inject(html: string, tags: Tags): string {
@@ -108,13 +134,14 @@ function ok(html: string, tags: Tags): Response {
 export async function GET(request: Request): Promise<Response> {
   const origin = siteOrigin(request)
   const url = new URL(request.url)
-  const parts = url.pathname.split('/').filter(Boolean)
+  const parts = routeParts(url)
+  const publicPath = `/${parts.join('/')}`
   const html = indexHtml()
 
   try {
     if (parts[0] === 'g' && isSlug(parts[1]) && parts.length === 2) {
       const { data } = await fetchApi<Gem>(`/gems/${parts[1]}`)
-      if (!data) return notFoundPage(html, origin, url.pathname)
+      if (!data) return notFoundPage(html, origin, publicPath)
       const where = placeName(data.city, data.area)
       const blurb = data.finds[0]?.description?.slice(0, 160) || `${data.name} on Unearth.`
       return ok(html, {
@@ -129,7 +156,7 @@ export async function GET(request: Request): Promise<Response> {
     if (parts[0] === 'u' && isHandle(parts[1]?.replace(/^@/, '').toLowerCase()) && parts.length === 2) {
       const handle = parts[1]!.replace(/^@/, '').toLowerCase()
       const { data } = await fetchApi<Profile>(`/users/${handle}`)
-      if (!data?.user.handle) return notFoundPage(html, origin, url.pathname)
+      if (!data?.user.handle) return notFoundPage(html, origin, publicPath)
       const n = data.user.gemsUnearthed ?? 0
       return ok(html, {
         title: `@${data.user.handle} · Unearth`,
@@ -143,7 +170,7 @@ export async function GET(request: Request): Promise<Response> {
     if (parts[0] === 'lists' && isCitySlug(parts[1]) && (parts[2] === 'top' || parts[2] === 'new') && parts.length === 3) {
       const kind = parts[2]
       const { data } = await fetchApi<PlacePage>(`/places/${parts[1]}?sort=${kind === 'top' ? 'polished' : 'new'}`)
-      if (!data) return notFoundPage(html, origin, url.pathname)
+      if (!data) return notFoundPage(html, origin, publicPath)
       const title = listTitle(kind, data.place.city)
       return ok(html, {
         title,
@@ -159,13 +186,13 @@ export async function GET(request: Request): Promise<Response> {
       const areaSlug = parts[1] && isSlug(parts[1]) ? parts[1] : undefined
       const categorySeg = parts[2]
       const category = categorySeg ? CATEGORY_FROM_SEGMENT[categorySeg] : undefined
-      if (parts.length === 3 && !category) return notFoundPage(html, origin, url.pathname)
+      if (parts.length === 3 && !category) return notFoundPage(html, origin, publicPath)
 
       const qs = new URLSearchParams()
       if (areaSlug) qs.set('area', areaSlug)
       if (category) qs.set('category', category)
       const { data } = await fetchApi<PlacePage>(`/places/${citySlug}${qs.size ? `?${qs}` : ''}`)
-      if (!data) return notFoundPage(html, origin, url.pathname)
+      if (!data) return notFoundPage(html, origin, publicPath)
 
       const { place } = data
       const title = placeTitle(place.city, place.area, category)
@@ -174,8 +201,8 @@ export async function GET(request: Request): Promise<Response> {
       return ok(html, {
         title,
         description: `${place.gemCount} ${place.gemCount === 1 ? 'gem' : 'gems'} in ${where}. ${lead}, shared by people who’ve been there.`,
-        url: `${origin}${url.pathname}`,
-        image: `${origin}/api/og${url.pathname}`,
+        url: `${origin}${publicPath}`,
+        image: `${origin}/api/og${publicPath}`,
         imageAlt: title,
       })
     }
@@ -183,11 +210,11 @@ export async function GET(request: Request): Promise<Response> {
     return ok(html, {
       title: 'Unearth — the places that aren’t on the top-10 lists',
       description: 'Hidden places, shared by people who’ve been there.',
-      url: `${origin}${url.pathname}`,
+      url: `${origin}${publicPath}`,
       image: `${origin}/og-image.png`,
       imageAlt: 'Unearth',
     })
   }
 
-  return notFoundPage(html, origin, url.pathname)
+  return notFoundPage(html, origin, publicPath)
 }
