@@ -39,6 +39,7 @@ export async function meRoutes(app: FastifyInstance): Promise<void> {
           f.id, f.gem_id, f.user_id, f.description, f.liked, f.disliked,
           f.tags, f.created_at,
           g.name as gem_name,
+          g.find_count as gem_find_count,
           (g.first_finder_id = ${userId}) as is_first_find
         from finds f
         join gems g on g.id = f.gem_id
@@ -61,6 +62,7 @@ export async function meRoutes(app: FastifyInstance): Promise<void> {
         tags: f.tags,
         createdAt: f.created_at,
         isFirstFind: Boolean(f.is_first_find),
+        gemFindCount: Number(f.gem_find_count),
       })),
     };
   });

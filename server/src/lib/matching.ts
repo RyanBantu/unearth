@@ -29,6 +29,7 @@ export async function findDuplicateCandidates(params: {
         address
       from gems
       where apple_place_id = ${applePlaceId}
+        and hidden_at is null
       limit 1
     `;
     if (byPlace.length > 0) {
@@ -54,6 +55,7 @@ export async function findDuplicateCandidates(params: {
       st_makepoint(${lng}, ${lat})::geography,
       ${radiusM}
     )
+      and hidden_at is null
       and similarity(name, ${name}) > ${DUPLICATE_NAME_SIM_THRESHOLD}
     order by name_sim desc, distance_m asc
     limit 3

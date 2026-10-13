@@ -26,6 +26,9 @@ struct APIGemDTO: Decodable {
     var isStashed: Bool?
     var myFindId: UUID?
     var finds: [APIFindDTO]?
+    var upvotes: Int?
+    var downvotes: Int?
+    var myVote: Int?
 
     func toGem() -> Gem {
         let mappedFinds = (finds ?? []).map { $0.toFind(gemName: name) }
@@ -60,7 +63,10 @@ struct APIGemDTO: Decodable {
             disliked: dislikedNotes,
             finds: mappedFinds,
             isStashed: isStashed ?? false,
-            myFindId: myFindId
+            myFindId: myFindId,
+            upvotes: upvotes ?? 0,
+            downvotes: downvotes ?? 0,
+            myVote: myVote
         )
     }
 }
@@ -164,9 +170,26 @@ struct CreateGemResponse: Decodable {
             status: status,
             isStashed: false,
             myFindId: myFindId,
-            finds: nil
+            finds: nil,
+            upvotes: 0,
+            downvotes: 0,
+            myVote: nil
         ).toGem()
     }
+}
+
+struct VoteBody: Encodable {
+    var value: Int
+}
+
+struct VoteResponse: Decodable {
+    var upvotes: Int
+    var downvotes: Int
+    var myVote: Int?
+}
+
+struct DeleteFindResponse: Decodable {
+    var gemDeleted: Bool
 }
 
 struct CreateFindResponse: Decodable {

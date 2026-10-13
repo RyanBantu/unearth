@@ -15,12 +15,15 @@ struct Find: Identifiable, Hashable, Codable {
     /// Raw API strings (server stores a single optional string per find).
     var likedText: String?
     var dislikedText: String?
+    /// Total finds on the gem (from `/me`); used for delete confirmations.
+    var gemFindCount: Int?
 
     enum CodingKeys: String, CodingKey {
         case id, gemId, gemName, userId, handle, createdAt
         case note, description
         case isFirstFind, liked, disliked, tags
         case likedText, dislikedText
+        case gemFindCount
     }
 
     init(
@@ -36,7 +39,8 @@ struct Find: Identifiable, Hashable, Codable {
         disliked: [String] = [],
         tags: [String] = [],
         likedText: String? = nil,
-        dislikedText: String? = nil
+        dislikedText: String? = nil,
+        gemFindCount: Int? = nil
     ) {
         self.id = id
         self.gemId = gemId
@@ -51,6 +55,7 @@ struct Find: Identifiable, Hashable, Codable {
         self.tags = tags
         self.likedText = likedText
         self.dislikedText = dislikedText
+        self.gemFindCount = gemFindCount
     }
 
     init(from decoder: Decoder) throws {
@@ -65,6 +70,7 @@ struct Find: Identifiable, Hashable, Codable {
             ?? c.decodeIfPresent(String.self, forKey: .description)
         isFirstFind = try c.decodeIfPresent(Bool.self, forKey: .isFirstFind) ?? false
         tags = try c.decodeIfPresent([String].self, forKey: .tags) ?? []
+        gemFindCount = try c.decodeIfPresent(Int.self, forKey: .gemFindCount)
 
         if let likedArr = try? c.decode([String].self, forKey: .liked) {
             liked = likedArr

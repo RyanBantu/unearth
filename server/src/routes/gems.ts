@@ -11,6 +11,7 @@ import {
   DUPLICATE_CONFLICT_NAME_SIM,
   MATCH_RADIUS_M,
 } from "../lib/status.js";
+import { clearVote, getMyVote, setVote } from "../lib/votes.js";
 import { requireAuth } from "../middleware/auth.js";
 
 const categoryEnum = z.enum([
@@ -76,10 +77,19 @@ const createFindBody = z.object({
   tags: tagsSchema,
 });
 
+const voteBody = z.object({
+  value: z.union([z.literal(1), z.literal(-1)]),
+});
+
 /** Use Authorization (available before auth preHandler) so per-user limits work with onRequest rate-limit. */
 function rateLimitByUser(request: FastifyRequest): string {
   const auth = request.headers.authorization;
   return auth ? `create:${auth}` : `create:ip:${request.ip}`;
+}
+
+function voteRateLimitByUser(request: FastifyRequest): string {
+  const auth = request.headers.authorization;
+  return auth ? `vote:${auth}` : `vote:ip:${request.ip}`;
 }
 
 export async function gemsRoutes(app: FastifyInstance): Promise<void> {
@@ -95,7 +105,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
       ? await sql`
           select
             id, name, category, address, apple_place_id, google_maps_url,
-            first_finder_id, find_count, created_at,
+            first_finder_id, find_count, upvotes, downvotes, created_at,
             st_y(location::geometry) as lat,
             st_x(location::geometry) as lng,
             st_distance(location, st_makepoint(${lng}, ${lat})::geography) as distance_m
@@ -106,13 +116,14 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
             ${radius_m}
           )
             and category = ${category}
+            and hidden_at is null
           order by distance_m asc
           limit 100
         `
       : await sql`
           select
             id, name, category, address, apple_place_id, google_maps_url,
-            first_finder_id, find_count, created_at,
+            first_finder_id, find_count, upvotes, downvotes, created_at,
             st_y(location::geometry) as lat,
             st_x(location::geometry) as lng,
             st_distance(location, st_makepoint(${lng}, ${lat})::geography) as distance_m
@@ -122,6 +133,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
             st_makepoint(${lng}, ${lat})::geography,
             ${radius_m}
           )
+            and hidden_at is null
           order by distance_m asc
           limit 100
         `;
@@ -139,6 +151,8 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
         lat: Number(g.lat),
         lng: Number(g.lng),
         distanceM: Number(g.distance_m),
+        upvotes: Number(g.upvotes),
+        downvotes: Number(g.downvotes),
         status: serializeGemStatus(Number(g.find_count)),
       })),
       matchRadiiM: MATCH_RADIUS_M,
@@ -175,7 +189,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
     const gems = await sql`
       select
         id, name, category, address, apple_place_id, google_maps_url,
-        first_finder_id, find_count, created_at,
+        first_finder_id, find_count, upvotes, downvotes, created_at,
         st_y(location::geometry) as lat,
         st_x(location::geometry) as lng
       from gems
@@ -187,7 +201,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(404).send({ error: "Gem not found" });
     }
 
-    const [finds, stashRows, myFind] = await Promise.all([
+    const [finds, stashRows, myFind, myVote] = await Promise.all([
       sql`
         select
           f.id, f.gem_id, f.user_id, f.description, f.liked, f.disliked,
@@ -208,6 +222,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
         where gem_id = ${gem.id} and user_id = ${request.user.id}
         limit 1
       `,
+      getMyVote(gem.id as string, request.user.id),
     ]);
 
     return {
@@ -222,6 +237,9 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
       lat: Number(gem.lat),
       lng: Number(gem.lng),
       status: serializeGemStatus(Number(gem.find_count)),
+      upvotes: Number(gem.upvotes),
+      downvotes: Number(gem.downvotes),
+      myVote,
       isStashed: stashRows.length > 0,
       myFindId: myFind[0]?.id ?? null,
       finds: finds.map((f) => ({
@@ -447,6 +465,87 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
         const message = err instanceof Error ? err.message : String(err);
         if (message.includes("finds_gem_id_user_id_key")) {
           return reply.code(409).send({ error: "You already have a find on this gem" });
+        }
+        throw err;
+      }
+    },
+  );
+
+  app.put(
+    "/gems/:id/vote",
+    {
+      preHandler: requireAuth,
+      config: {
+        rateLimit: {
+          max: 60,
+          timeWindow: "1 hour",
+          keyGenerator: voteRateLimitByUser,
+        },
+      },
+    },
+    async (request, reply) => {
+      const params = gemIdParams.safeParse(request.params);
+      if (!params.success) {
+        return reply.code(400).send({ error: "Invalid gem id" });
+      }
+      const body = voteBody.safeParse(request.body);
+      if (!body.success) {
+        return reply.code(400).send({ error: "Invalid body", details: body.error.flatten() });
+      }
+
+      try {
+        return await setVote({
+          gemId: params.data.id,
+          userId: request.user.id,
+          value: body.data.value,
+        });
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (message === "GEM_NOT_FOUND") {
+          return reply.code(404).send({ error: "Gem not found" });
+        }
+        if (message === "VOTE_FORBIDDEN") {
+          return reply.code(403).send({
+            error: "You can't vote on a gem you unearthed or found",
+          });
+        }
+        throw err;
+      }
+    },
+  );
+
+  app.delete(
+    "/gems/:id/vote",
+    {
+      preHandler: requireAuth,
+      config: {
+        rateLimit: {
+          max: 60,
+          timeWindow: "1 hour",
+          keyGenerator: voteRateLimitByUser,
+        },
+      },
+    },
+    async (request, reply) => {
+      const params = gemIdParams.safeParse(request.params);
+      if (!params.success) {
+        return reply.code(400).send({ error: "Invalid gem id" });
+      }
+
+      try {
+        return await clearVote({
+          gemId: params.data.id,
+          userId: request.user.id,
+        });
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (message === "GEM_NOT_FOUND") {
+          return reply.code(404).send({ error: "Gem not found" });
+        }
+        if (message === "VOTE_FORBIDDEN") {
+          return reply.code(403).send({
+            error: "You can't vote on a gem you unearthed or found",
+          });
         }
         throw err;
       }

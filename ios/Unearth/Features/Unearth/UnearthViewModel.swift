@@ -211,7 +211,10 @@ final class UnearthViewModel {
             disliked: [],
             finds: [],
             isStashed: false,
-            myFindId: nil
+            myFindId: nil,
+            upvotes: 0,
+            downvotes: 0,
+            myVote: nil
         )
         name = match.name
         category = match.category

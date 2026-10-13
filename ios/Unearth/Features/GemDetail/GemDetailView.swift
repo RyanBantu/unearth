@@ -9,6 +9,7 @@ struct GemDetailView: View {
     var onFoundItToo: ((Gem) -> Void)? = nil
     var onStashChanged: (() -> Void)? = nil
     var onGemUpdated: ((Gem) -> Void)? = nil
+    var onFindDeleted: ((gemDeleted: Bool, message: String)) -> Void = { _ in }
 
     @State private var lookAroundScene: MKLookAroundScene?
     @State private var showLookAround = false
@@ -17,6 +18,8 @@ struct GemDetailView: View {
     @State private var didCheckLookAround = false
     @State private var reportTarget: ReportTarget?
     @State private var isRefreshing = false
+    @State private var showDeleteConfirm = false
+    @State private var isDeletingFind = false
 
     private let firstFindBodyColor = Color(hex: 0x2A3530)
 
@@ -38,7 +41,8 @@ struct GemDetailView: View {
         onClose: (() -> Void)? = nil,
         onFoundItToo: ((Gem) -> Void)? = nil,
         onStashChanged: (() -> Void)? = nil,
-        onGemUpdated: ((Gem) -> Void)? = nil
+        onGemUpdated: ((Gem) -> Void)? = nil,
+        onFindDeleted: @escaping ((gemDeleted: Bool, message: String)) -> Void = { _ in }
     ) {
         _gem = State(initialValue: gem)
         self.userLocation = userLocation
@@ -46,6 +50,7 @@ struct GemDetailView: View {
         self.onFoundItToo = onFoundItToo
         self.onStashChanged = onStashChanged
         self.onGemUpdated = onGemUpdated
+        self.onFindDeleted = onFindDeleted
     }
 
     var body: some View {
@@ -72,6 +77,14 @@ struct GemDetailView: View {
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
             }
+        }
+        .alert(deleteAlertTitle, isPresented: $showDeleteConfirm) {
+            Button("Delete", role: .destructive) {
+                Task { await deleteMyFind() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(deleteAlertMessage)
         }
         .task {
             await loadLookAround()
@@ -103,8 +116,11 @@ struct GemDetailView: View {
                     onClose?()
                 }
                 Spacer()
-                RoundIconButton(systemName: gem.isStashed ? "bookmark.fill" : "bookmark") {
-                    Task { await toggleStash() }
+                HStack(spacing: 10) {
+                    overflowMenu
+                    RoundIconButton(systemName: gem.isStashed ? "bookmark.fill" : "bookmark") {
+                        Task { await toggleStash() }
+                    }
                 }
             }
             .padding(.horizontal, 16)
@@ -125,6 +141,29 @@ struct GemDetailView: View {
             }
         }
         .frame(height: 260)
+    }
+
+    private var overflowMenu: some View {
+        Menu {
+            if gem.hasFound {
+                Button("Delete my find", role: .destructive) {
+                    showDeleteConfirm = true
+                }
+            }
+            if !gem.hasFound {
+                Button("Report", role: .destructive) {
+                    reportTarget = .gem
+                }
+            }
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(UnearthColor.ink)
+                .frame(width: 44, height: 44)
+                .background(UnearthColor.surface)
+                .clipShape(Circle())
+                .floatingShadow()
+        }
     }
 
     private var headerMapStyle: MapStyle {
@@ -171,6 +210,16 @@ struct GemDetailView: View {
 
             findersStrip
 
+            if gem.canVote {
+                VoteRow(
+                    upvotes: gem.upvotes,
+                    downvotes: gem.downvotes,
+                    myVote: gem.myVote.flatMap(GemVote.init(rawValue:)),
+                    onTapUp: { Task { await toggleVote(to: .up) } },
+                    onTapDown: { Task { await toggleVote(to: .down) } }
+                )
+            }
+
             if let first = gem.firstFind {
                 VStack(alignment: .leading, spacing: 8) {
                     if let note = first.note ?? gem.note {
@@ -205,6 +254,15 @@ struct GemDetailView: View {
             Badge(text: gem.category.displayName, variant: .neutral)
             ForEach(gem.statusBadges, id: \.self) { status in
                 Badge(text: status.shortBadgeText, variant: .from(status: status))
+            }
+            if gem.showsVoteScore {
+                HStack(spacing: 3) {
+                    Image(systemName: "hand.thumbsup")
+                        .font(.system(size: 11, weight: .semibold))
+                    Text("\(gem.netScore)")
+                        .font(UnearthFont.badge(12))
+                }
+                .foregroundStyle(UnearthColor.inkSecondary)
             }
             if isRefreshing {
                 ProgressView()
@@ -395,12 +453,14 @@ struct GemDetailView: View {
                 .buttonStyle(.plain)
             }
 
-            Button("Report gem") {
-                reportTarget = .gem
+            if gem.hasFound {
+                Button("Report gem") {
+                    reportTarget = .gem
+                }
+                .font(UnearthFont.bodySmall())
+                .foregroundStyle(UnearthColor.inkSecondary)
+                .padding(.top, 2)
             }
-            .font(UnearthFont.bodySmall())
-            .foregroundStyle(UnearthColor.inkSecondary)
-            .padding(.top, 2)
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)
@@ -439,6 +499,22 @@ struct GemDetailView: View {
         }
     }
 
+    private var otherFinderCount: Int {
+        max(0, gem.findCount - 1)
+    }
+
+    private var deleteAlertTitle: String {
+        otherFinderCount == 0 ? "Delete this gem?" : "Delete your find?"
+    }
+
+    private var deleteAlertMessage: String {
+        if otherFinderCount == 0 {
+            return "This removes the gem from Unearth for everyone. This can't be undone."
+        }
+        let noun = otherFinderCount == 1 ? "other" : "others"
+        return "Your write-up will be removed. The gem stays because \(otherFinderCount) \(noun) found it too."
+    }
+
     // MARK: - Actions
 
     /// Reload from `GET /gems/:id` so badges / myFindId stay in sync.
@@ -449,6 +525,68 @@ struct GemDetailView: View {
             let fresh = try await APIClient.shared.gem(id: gem.id)
             gem = fresh
             onGemUpdated?(fresh)
+        } catch {
+            toastMessage = error.localizedDescription
+        }
+    }
+
+    private func toggleVote(to target: GemVote) async {
+        let previousUp = gem.upvotes
+        let previousDown = gem.downvotes
+        let previousVote = gem.myVote
+
+        var nextUp = previousUp
+        var nextDown = previousDown
+        var nextVote: Int?
+
+        if previousVote == target.rawValue {
+            nextVote = nil
+            if target == .up { nextUp -= 1 } else { nextDown -= 1 }
+        } else {
+            if previousVote == GemVote.up.rawValue { nextUp -= 1 }
+            if previousVote == GemVote.down.rawValue { nextDown -= 1 }
+            if target == .up { nextUp += 1 } else { nextDown += 1 }
+            nextVote = target.rawValue
+        }
+
+        gem.upvotes = max(0, nextUp)
+        gem.downvotes = max(0, nextDown)
+        gem.myVote = nextVote
+        onGemUpdated?(gem)
+
+        do {
+            let response: VoteResponse
+            if nextVote == nil {
+                response = try await APIClient.shared.clearVote(gemId: gem.id)
+            } else {
+                response = try await APIClient.shared.setVote(gemId: gem.id, value: target.rawValue)
+            }
+            gem.upvotes = response.upvotes
+            gem.downvotes = response.downvotes
+            gem.myVote = response.myVote
+            onGemUpdated?(gem)
+        } catch {
+            gem.upvotes = previousUp
+            gem.downvotes = previousDown
+            gem.myVote = previousVote
+            onGemUpdated?(gem)
+            toastMessage = error.localizedDescription
+        }
+    }
+
+    private func deleteMyFind() async {
+        guard let findId = gem.myFindId, !isDeletingFind else { return }
+        isDeletingFind = true
+        defer { isDeletingFind = false }
+        do {
+            let response = try await APIClient.shared.deleteFind(id: findId)
+            if response.gemDeleted {
+                onFindDeleted((gemDeleted: true, message: "Gem deleted"))
+            } else {
+                toastMessage = "Find deleted"
+                await refreshFromAPI()
+                onFindDeleted((gemDeleted: false, message: "Find deleted"))
+            }
         } catch {
             toastMessage = error.localizedDescription
         }
@@ -561,6 +699,6 @@ private struct FlowLayout: Layout {
     GemDetailView(gem: Gem.mockGems[2], onClose: {})
 }
 
-#Preview("GemDetailView · Mined out") {
+#Preview("GemDetailView · Mined out / own find") {
     GemDetailView(gem: Gem.mockGems[3], onClose: {})
 }

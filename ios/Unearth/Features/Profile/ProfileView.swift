@@ -11,6 +11,9 @@ struct ProfileView: View {
     @State private var isLoading = false
     @State private var loadError: String?
     @State private var hasLoadedOnce = false
+    @State private var toastMessage: String?
+    @State private var findPendingDelete: Find?
+    @State private var showDeleteFindConfirm = false
 
     init(
         auth: AuthService,
@@ -43,6 +46,7 @@ struct ProfileView: View {
             .navigationBarTitleDisplayMode(.inline)
             .refreshable { await reload() }
             .task { await reload() }
+            .toast($toastMessage)
             .alert("Delete account?", isPresented: $showDeleteConfirm) {
                 Button("Delete account", role: .destructive) {
                     Task {
@@ -55,7 +59,36 @@ struct ProfileView: View {
             } message: {
                 Text("This permanently deletes your account, finds, and stash, and revokes Sign in with Apple. This cannot be undone.")
             }
+            .alert(deleteFindAlertTitle, isPresented: $showDeleteFindConfirm) {
+                Button("Delete", role: .destructive) {
+                    Task { await confirmDeleteFind() }
+                }
+                Button("Cancel", role: .cancel) {
+                    findPendingDelete = nil
+                }
+            } message: {
+                Text(deleteFindAlertMessage)
+            }
         }
+    }
+
+    private var deleteFindAlertTitle: String {
+        guard let find = findPendingDelete else { return "Delete your find?" }
+        let count = find.gemFindCount ?? 1
+        return count <= 1 ? "Delete this gem?" : "Delete your find?"
+    }
+
+    private var deleteFindAlertMessage: String {
+        guard let find = findPendingDelete else {
+            return "Your write-up will be removed."
+        }
+        let count = find.gemFindCount ?? 1
+        if count <= 1 {
+            return "This removes the gem from Unearth for everyone. This can't be undone."
+        }
+        let others = count - 1
+        let noun = others == 1 ? "other" : "others"
+        return "Your write-up will be removed. The gem stays because \(others) \(noun) found it too."
     }
 
     private func profileContent(_ user: User) -> some View {
@@ -122,39 +155,52 @@ struct ProfileView: View {
                 )
                 .frame(minHeight: 160)
             } else {
-                LazyVStack(spacing: 0) {
+                List {
                     ForEach(user.finds) { find in
-                        HStack(alignment: .top, spacing: 12) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(find.gemName)
-                                    .font(UnearthFont.cardTitle(16))
-                                    .foregroundStyle(UnearthColor.ink)
-                                if let note = find.note, !note.isEmpty {
-                                    Text(note)
-                                        .font(UnearthFont.bodySmall())
-                                        .foregroundStyle(UnearthColor.inkSecondary)
-                                        .lineLimit(2)
-                                }
-                                HStack(spacing: 6) {
-                                    if find.isFirstFind {
-                                        Badge(text: "First find", variant: .rare)
-                                    }
-                                    Text(find.createdAt, style: .date)
-                                        .font(UnearthFont.bodySmall())
-                                        .foregroundStyle(UnearthColor.inkTertiary)
+                        findRow(find)
+                            .listRowInsets(EdgeInsets(top: 14, leading: 16, bottom: 14, trailing: 16))
+                            .listRowBackground(UnearthColor.surface)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    findPendingDelete = find
+                                    showDeleteFindConfirm = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
                                 }
                             }
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 14)
-                        Divider().overlay(UnearthColor.divider)
                     }
                 }
-                .background(UnearthColor.surface)
+                .listStyle(.plain)
+                .scrollDisabled(true)
+                .frame(height: CGFloat(user.finds.count) * 88)
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .padding(.horizontal, 16)
             }
+        }
+    }
+
+    private func findRow(_ find: Find) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(find.gemName)
+                    .font(UnearthFont.cardTitle(16))
+                    .foregroundStyle(UnearthColor.ink)
+                if let note = find.note, !note.isEmpty {
+                    Text(note)
+                        .font(UnearthFont.bodySmall())
+                        .foregroundStyle(UnearthColor.inkSecondary)
+                        .lineLimit(2)
+                }
+                HStack(spacing: 6) {
+                    if find.isFirstFind {
+                        Badge(text: "First find", variant: .rare)
+                    }
+                    Text(find.createdAt, style: .date)
+                        .font(UnearthFont.bodySmall())
+                        .foregroundStyle(UnearthColor.inkTertiary)
+                }
+            }
+            Spacer(minLength: 0)
         }
     }
 
@@ -224,7 +270,28 @@ struct ProfileView: View {
         .buttonStyle(.plain)
     }
 
+    private func confirmDeleteFind() async {
+        guard let find = findPendingDelete else { return }
+        findPendingDelete = nil
+        do {
+            let response = try await APIClient.shared.deleteFind(id: find.id)
+            toastMessage = response.gemDeleted ? "Gem deleted" : "Find deleted"
+            await reload()
+        } catch {
+            toastMessage = error.localizedDescription
+        }
+    }
+
     private func reload() async {
+        #if DEBUG
+        if ScreenshotScene.isDemo {
+            user = auth.currentUser ?? .mock
+            isLoading = false
+            hasLoadedOnce = true
+            loadError = nil
+            return
+        }
+        #endif
         isLoading = true
         loadError = nil
         defer {

@@ -2,8 +2,16 @@ export const FIND_COUNT_POLISHED = 3;
 export const FIND_COUNT_RARE_MAX = 10;
 export const FIND_COUNT_MINED_OUT = 25;
 
+/** Hide gem pending review when downvotes meet both thresholds. */
+export const HIDE_DOWNVOTE_MIN = 5;
+export const HIDE_DOWNVOTE_RATIO = 2; // downvotes > HIDE_DOWNVOTE_RATIO * upvotes
+
 export const PROSPECTOR_DIGGER_MAX = 9;
 export const PROSPECTOR_LEVEL_MAX = 49;
+
+export function shouldHideGem(upvotes: number, downvotes: number): boolean {
+  return downvotes >= HIDE_DOWNVOTE_MIN && downvotes > HIDE_DOWNVOTE_RATIO * upvotes;
+}
 
 export type GemStatusLabel = "Uncut" | "Polished" | "Rare" | "Mined out";
 

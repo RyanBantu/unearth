@@ -39,6 +39,15 @@ struct GemCard: View {
                                     variant: .from(status: status)
                                 )
                             }
+                            if gem.showsVoteScore {
+                                HStack(spacing: 3) {
+                                    Image(systemName: "hand.thumbsup")
+                                        .font(.system(size: 11, weight: .semibold))
+                                    Text("\(gem.netScore)")
+                                        .font(UnearthFont.badge(12))
+                                }
+                                .foregroundStyle(UnearthColor.inkSecondary)
+                            }
                         }
                     }
                 }

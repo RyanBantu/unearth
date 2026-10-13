@@ -21,10 +21,20 @@ struct Gem: Identifiable, Hashable, Codable {
     var finds: [Find]
     var isStashed: Bool
     var myFindId: UUID?
+    var upvotes: Int
+    var downvotes: Int
+    var myVote: Int?
 
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
+
+    var netScore: Int { upvotes - downvotes }
+
+    var showsVoteScore: Bool { upvotes > 0 || downvotes > 0 }
+
+    /// Finders already endorsed the gem — voting UI is hidden.
+    var canVote: Bool { myFindId == nil }
 
     var status: GemStatus {
         GemStatus.from(findCount: findCount)
@@ -123,7 +133,10 @@ extension Gem {
                 disliked: ["Can get crowded", "Cash only"],
                 finds: findsFor(mockGemIDs[0]),
                 isStashed: true,
-                myFindId: nil
+                myFindId: nil,
+                upvotes: 4,
+                downvotes: 1,
+                myVote: nil
             ),
             Gem(
                 id: mockGemIDs[1],
@@ -144,7 +157,10 @@ extension Gem {
                 disliked: ["Wind"],
                 finds: findsFor(mockGemIDs[1]),
                 isStashed: false,
-                myFindId: findsFor(mockGemIDs[1]).first?.id
+                myFindId: findsFor(mockGemIDs[1]).first?.id,
+                upvotes: 0,
+                downvotes: 0,
+                myVote: nil
             ),
             Gem(
                 id: mockGemIDs[2],
@@ -165,7 +181,10 @@ extension Gem {
                 disliked: ["Steep start"],
                 finds: findsFor(mockGemIDs[2]),
                 isStashed: false,
-                myFindId: nil
+                myFindId: nil,
+                upvotes: 8,
+                downvotes: 2,
+                myVote: 1
             ),
             Gem(
                 id: mockGemIDs[3],
@@ -186,7 +205,10 @@ extension Gem {
                 disliked: ["Limited seating"],
                 finds: [],
                 isStashed: true,
-                myFindId: UUID(uuidString: "A1000000-0000-0000-0000-000000000099")
+                myFindId: UUID(uuidString: "A1000000-0000-0000-0000-000000000099"),
+                upvotes: 1,
+                downvotes: 0,
+                myVote: nil
             ),
         ]
     }()

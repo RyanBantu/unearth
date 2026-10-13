@@ -17,6 +17,10 @@ struct HomeShellView: View {
     @State private var stashIsLoading = false
     @State private var stashError: String?
     @State private var stashReloadToken = 0
+    #if DEBUG
+    @State private var screenshotGem: Gem?
+    @State private var screenshotShare: ShareOfferPayload?
+    #endif
 
     var body: some View {
         VStack(spacing: 0) {
@@ -55,6 +59,15 @@ struct HomeShellView: View {
         }
         .ignoresSafeArea(.keyboard)
         .toast($toastMessage)
+        #if DEBUG
+        .task { applyScreenshotScene() }
+        .fullScreenCover(item: $screenshotGem) { gem in
+            GemDetailView(gem: gem, userLocation: locationService.currentLocation, onClose: {})
+        }
+        .fullScreenCover(item: $screenshotShare) { payload in
+            ShareOfferSheet(payload: payload, onFinished: {})
+        }
+        #endif
         .fullScreenCover(isPresented: $showUnearth) {
             UnearthView(
                 locationService: locationService,
@@ -112,6 +125,22 @@ struct HomeShellView: View {
                 },
                 onGemUpdated: { updated in
                     digViewModel.applyUpdatedGem(updated)
+                },
+                onFindDeleted: { gemId, gemDeleted, message in
+                    if gemDeleted {
+                        presentedGem = nil
+                        digViewModel.removeGem(id: gemId)
+                        selectedTab = .dig
+                        toastMessage = message
+                    } else {
+                        Task {
+                            await digViewModel.reloadNearby(
+                                fallback: locationService.currentLocation?.coordinate
+                            )
+                        }
+                    }
+                    stashReloadToken += 1
+                    Task { await loadStash() }
                 }
             )
         }
@@ -136,6 +165,18 @@ struct HomeShellView: View {
     }
 
     private func loadStash() async {
+        #if DEBUG
+        if ScreenshotScene.isDemo {
+            stashGems = Gem.mockGems.map {
+                var gem = $0
+                gem.isStashed = true
+                return gem
+            }
+            stashIsLoading = false
+            stashError = nil
+            return
+        }
+        #endif
         stashIsLoading = true
         stashError = nil
         defer { stashIsLoading = false }
@@ -154,6 +195,48 @@ struct HomeShellView: View {
         }
     }
 
+    #if DEBUG
+    private func applyScreenshotScene() {
+        guard let scene = ScreenshotScene.current else { return }
+        stashGems = Gem.mockGems.map {
+            var gem = $0
+            gem.isStashed = true
+            return gem
+        }
+        switch scene {
+        case .signin, .handle, .location:
+            break
+        case .dig:
+            selectedTab = .dig
+        case .digList:
+            selectedTab = .dig
+            digViewModel.showNearbyList = true
+        case .gem:
+            selectedTab = .dig
+            screenshotGem = Gem.mockGems[0]
+        case .unearth:
+            selectedTab = .dig
+            showUnearth = true
+        case .stash:
+            selectedTab = .stash
+        case .activity:
+            selectedTab = .activity
+        case .profile:
+            selectedTab = .profile
+        case .share:
+            selectedTab = .dig
+            let gem = Gem.mockGems[0]
+            screenshotShare = ShareOfferPayload(
+                gemName: gem.name,
+                categoryName: gem.category.displayName,
+                unearthedByHandle: auth.currentUser?.handle ?? "ryan",
+                coordinate: gem.coordinate,
+                successMessage: "You unearthed \(gem.name)",
+                gem: gem
+            )
+        }
+    }
+    #endif
 }
 
 private struct PresentedGem: Identifiable, Hashable {
@@ -168,6 +251,7 @@ private struct GemDetailHost: View {
     var onFoundItToo: (Gem) -> Void
     var onStashChanged: () -> Void
     var onGemUpdated: (Gem) -> Void
+    var onFindDeleted: (_ gemId: UUID, _ gemDeleted: Bool, _ message: String) -> Void
 
     @State private var detail: Gem?
     @State private var errorMessage: String?
@@ -182,7 +266,10 @@ private struct GemDetailHost: View {
                     onClose: onClose,
                     onFoundItToo: onFoundItToo,
                     onStashChanged: onStashChanged,
-                    onGemUpdated: onGemUpdated
+                    onGemUpdated: onGemUpdated,
+                    onFindDeleted: { result in
+                        onFindDeleted(gemId, result.gemDeleted, result.message)
+                    }
                 )
                 .task(id: gemId) {
                     // Refresh when reopened after “I found it too”.

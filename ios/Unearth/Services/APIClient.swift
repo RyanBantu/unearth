@@ -272,6 +272,18 @@ actor APIClient {
         try await post("/gems/\(gemId.uuidString)/finds", body: body)
     }
 
+    func setVote(gemId: UUID, value: Int) async throws -> VoteResponse {
+        try await put("/gems/\(gemId.uuidString)/vote", body: VoteBody(value: value))
+    }
+
+    func clearVote(gemId: UUID) async throws -> VoteResponse {
+        try await delete("/gems/\(gemId.uuidString)/vote")
+    }
+
+    func deleteFind(id: UUID) async throws -> DeleteFindResponse {
+        try await delete("/finds/\(id.uuidString)")
+    }
+
     // MARK: - Stash / activity / reports
 
     func stash() async throws -> StashResponse {

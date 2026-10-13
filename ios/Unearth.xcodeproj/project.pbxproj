@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6C68171840BC4C2DB96FE0BA /* VoteRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72FC1A29FC4FEFA6B0C778 /* VoteRow.swift */; };
 		0013A0176601E7009DACB4A5 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E53DB82A53CCF23E9A9E991 /* SignInView.swift */; };
 		0211CD9CC160959E064ED6C7 /* ShareOfferSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2749C7D365FE4FD3F101CA8 /* ShareOfferSheet.swift */; };
 		0D05EEC649C24515B797BF69 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACF63465BD82FB1FE5F4E22 /* User.swift */; };
@@ -21,6 +22,7 @@
 		2790DA07E5B971AD5D5F0189 /* MatchCandidate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5B3665C5E331619BBFAE73 /* MatchCandidate.swift */; };
 		2BC248FC45085318613EBE65 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 01452C441C132DAE03D53B94 /* Assets.xcassets */; };
 		396CBEC8CD42C09F735858BA /* UnearthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7BD346328B8A99B0F7E705E /* UnearthViewModel.swift */; };
+		4425A8ECA48ABED07983B40A /* ScreenshotSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2F150DC86D59F80D806894 /* ScreenshotSupport.swift */; };
 		48D961E67D586F39E41081A9 /* Chip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9120316D91BF39A4BCBF89 /* Chip.swift */; };
 		4A5444F183597B4A328D3633 /* Shadows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80C70C906423387F6C40D177 /* Shadows.swift */; };
 		4C0F73931744C0008A757567 /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89250ABAC52C02F2D97574FB /* OnboardingFlowView.swift */; };
@@ -59,6 +61,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DA72FC1A29FC4FEFA6B0C778 /* VoteRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoteRow.swift; sourceTree = "<group>"; };
 		0083A213A793C6B0A592BA8D /* Unearth.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Unearth.entitlements; sourceTree = "<group>"; };
 		00A048782079ECEA307A04FF /* GemPinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GemPinView.swift; sourceTree = "<group>"; };
 		01452C441C132DAE03D53B94 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -95,6 +98,7 @@
 		89250ABAC52C02F2D97574FB /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
 		8B9120316D91BF39A4BCBF89 /* Chip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chip.swift; sourceTree = "<group>"; };
 		93BDF2871A86C8D3CB1C65C5 /* Badge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Badge.swift; sourceTree = "<group>"; };
+		9B2F150DC86D59F80D806894 /* ScreenshotSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotSupport.swift; sourceTree = "<group>"; };
 		9FA4D605A9C263CF249AD91D /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		A00A5740E63FB6BE5068E1C2 /* LocationPermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPermissionView.swift; sourceTree = "<group>"; };
 		A1B43D726E1D0A2C76D9D16D /* HomeShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeShellView.swift; sourceTree = "<group>"; };
@@ -192,6 +196,7 @@
 				8B9120316D91BF39A4BCBF89 /* Chip.swift */,
 				3F369C050A458469EA5CDF69 /* Field.swift */,
 				1A65CAB0F4DD10BA2B5D6131 /* GemCard.swift */,
+				DA72FC1A29FC4FEFA6B0C778 /* VoteRow.swift */,
 				721B41F36D197D2E5296421D /* OutlineButton.swift */,
 				8166C42DA5D0CDA8EB5606E5 /* PrimaryButton.swift */,
 				32B8EC344CA7973274C2155D /* RoundIconButton.swift */,
@@ -226,6 +231,7 @@
 		8F587E911025F97554F93A1C /* Share */ = {
 			isa = PBXGroup;
 			children = (
+				9B2F150DC86D59F80D806894 /* ScreenshotSupport.swift */,
 				4F37CA9D0FEA4ED4CDF417C6 /* ShareCardRenderer.swift */,
 				FDE60E3F38526CE93BB100AE /* ShareCardView.swift */,
 				C2749C7D365FE4FD3F101CA8 /* ShareOfferSheet.swift */,
@@ -395,6 +401,7 @@
 				F86F94B0A8FC92461B30D419 /* Find.swift in Sources */,
 				22A748D8992E1A9CECD9C279 /* Gem.swift in Sources */,
 				21D7E2CFAC7BD8E4F916209E /* GemCard.swift in Sources */,
+				6C68171840BC4C2DB96FE0BA /* VoteRow.swift in Sources */,
 				58AA4EF8179C21447F1C56FE /* GemDetailView.swift in Sources */,
 				F0EE8F7786EDEDEBCA1FA93C /* GemPinView.swift in Sources */,
 				83C3BD63CC84EED6FB55F591 /* GemStatus.swift in Sources */,
@@ -413,6 +420,7 @@
 				F7F1D04FD8CE8E4F17B682E1 /* RootView.swift in Sources */,
 				EBF743E1BCAF99CF13ECCB85 /* RoundIconButton.swift in Sources */,
 				A0AC595309A36EB8356A8E6C /* ScreenStates.swift in Sources */,
+				4425A8ECA48ABED07983B40A /* ScreenshotSupport.swift in Sources */,
 				4A5444F183597B4A328D3633 /* Shadows.swift in Sources */,
 				F68DC0CB5A95103D0C973E70 /* ShareCardRenderer.swift in Sources */,
 				EDF557A3F1491161AA530508 /* ShareCardView.swift in Sources */,

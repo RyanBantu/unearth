@@ -17,6 +17,8 @@ export async function stashRoutes(app: FastifyInstance): Promise<void> {
         g.category,
         g.address,
         g.find_count,
+        g.upvotes,
+        g.downvotes,
         g.apple_place_id,
         g.google_maps_url,
         g.first_finder_id,
@@ -43,6 +45,8 @@ export async function stashRoutes(app: FastifyInstance): Promise<void> {
         lat: Number(g.lat),
         lng: Number(g.lng),
         stashedAt: g.stashed_at,
+        upvotes: Number(g.upvotes),
+        downvotes: Number(g.downvotes),
         status: serializeGemStatus(Number(g.find_count)),
       })),
     };

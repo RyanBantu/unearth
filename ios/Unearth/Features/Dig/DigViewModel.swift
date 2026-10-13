@@ -94,6 +94,13 @@ final class DigViewModel {
         }
     }
 
+    func removeGem(id: UUID) {
+        gems.removeAll { $0.id == id }
+        if selectedGem?.id == id {
+            selectedGem = nil
+        }
+    }
+
     func clearSelection() {
         withAnimation(.easeInOut(duration: 0.2)) {
             selectedGem = nil

@@ -5,6 +5,7 @@ import { authRoutes } from "./routes/auth.js";
 import { meRoutes } from "./routes/me.js";
 import { handlesRoutes } from "./routes/handles.js";
 import { gemsRoutes } from "./routes/gems.js";
+import { findsRoutes } from "./routes/finds.js";
 import { stashRoutes } from "./routes/stash.js";
 import { activityRoutes } from "./routes/activity.js";
 import { usersRoutes } from "./routes/users.js";
@@ -34,6 +35,7 @@ export async function buildApp() {
   await app.register(meRoutes);
   await app.register(handlesRoutes);
   await app.register(gemsRoutes);
+  await app.register(findsRoutes);
   await app.register(stashRoutes);
   await app.register(activityRoutes);
   await app.register(usersRoutes);
