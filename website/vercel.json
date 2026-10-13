@@ -1,3 +1,39 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "headers": [
+    {
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [{ "key": "Content-Type", "value": "application/json" }]
+    }
+  ],
+  "rewrites": [
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    {
+      "source": "/api/:path((?!page(?:$|\\?)|sitemap(?:$|\\?)|og/).*)",
+      "destination": "https://unearth-1o4a.onrender.com/:path"
+    },
+    { "source": "/privacy", "destination": "/index.html" },
+    { "source": "/terms", "destination": "/index.html" },
+    { "source": "/search", "destination": "/index.html" },
+    { "source": "/g/:slug", "destination": "/api/page" },
+    { "source": "/u/:handle", "destination": "/api/page" },
+    { "source": "/lists/:city/:kind", "destination": "/api/page" },
+    {
+      "source": "/:city((?!privacy|terms|search|g|u|lists|api|assets)[a-z0-9-]+)",
+      "destination": "/api/page"
+    },
+    {
+      "source": "/:city((?!privacy|terms|search|g|u|lists|api|assets)[a-z0-9-]+)/:area([a-z0-9-]+)",
+      "destination": "/api/page"
+    },
+    {
+      "source": "/:city((?!privacy|terms|search|g|u|lists|api|assets)[a-z0-9-]+)/:area([a-z0-9-]+)/:category([a-z0-9-]+)",
+      "destination": "/api/page"
+    },
+    { "source": "/((?!api/|\\.well-known/).*)", "destination": "/index.html" }
+  ],
+  "functions": {
+    "api/page.ts": { "includeFiles": "dist/index.html" },
+    "api/og/[...path].tsx": { "includeFiles": "api/_fonts/**" },
+    "api/sitemap.ts": {}
+  }
 }

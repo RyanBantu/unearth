@@ -1,8 +1,16 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { AnimatePresence, motion, useMotionValueEvent, useScroll, type Variants } from 'motion/react'
 import { Logo } from './Logo'
 import { AppStoreButton } from './AppStoreButton'
+import { Icon } from './Icon'
+import { site, webSignInEnabled } from '../config'
+
+const MotionLink = motion.create(Link)
+
+const AccountButton = webSignInEnabled
+  ? lazy(() => import('../app/auth/WebAuth').then((m) => ({ default: m.AccountButton })))
+  : null
 
 const sections = [
   { href: '/#how', label: 'How it works' },
@@ -79,9 +87,17 @@ export function Nav() {
               {s.label}
             </a>
           ))}
-          <NavLink to="/privacy">Privacy</NavLink>
         </nav>
-        <a className="nav__cta" href="/#download" onClick={() => setOpen(false)}>
+        <NavLink to="/search" className="nav__search" aria-label="Search gems" onClick={() => setOpen(false)}>
+          <Icon name="search" size={20} />
+          <span>Search</span>
+        </NavLink>
+        {AccountButton && (
+          <Suspense fallback={null}>
+            <AccountButton />
+          </Suspense>
+        )}
+        <a className="nav__cta" href={site.appStoreUrl || '/#download'} onClick={() => setOpen(false)}>
           Get the app
         </a>
         <button
@@ -115,6 +131,9 @@ export function Nav() {
               animate="open"
               exit="closed"
             >
+              <MotionLink to="/search" variants={menuItem} onClick={() => setOpen(false)}>
+                Search gems
+              </MotionLink>
               {sections.map((s) => (
                 <motion.a key={s.href} href={s.href} variants={menuItem} onClick={() => setOpen(false)}>
                   {s.label}

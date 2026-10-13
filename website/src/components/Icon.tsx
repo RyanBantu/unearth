@@ -68,6 +68,57 @@ const paths = {
       <path d="m9 12 2 2 4-4" />
     </>
   ),
+  trail: (
+    <>
+      <path d="M5 21c2-4 6-4 7-8s-2-6 1-9" />
+      <circle cx="17" cy="5" r="2" />
+      <path d="M8 21h.01M14 17h.01" />
+    </>
+  ),
+  shop: (
+    <>
+      <path d="M4 9h16l-1 11H5L4 9Z" />
+      <path d="M8.5 9V7a3.5 3.5 0 0 1 7 0v2" />
+    </>
+  ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="m20 20-4.2-4.2" />
+    </>
+  ),
+  directions: (
+    <>
+      <path d="M12 2.5 21.5 12 12 21.5 2.5 12 12 2.5Z" />
+      <path d="M9 13.5V11a1 1 0 0 1 1-1h5m-2-2 2 2-2 2" />
+    </>
+  ),
+  link: (
+    <>
+      <path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1" />
+      <path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1" />
+    </>
+  ),
+  external: (
+    <>
+      <path d="M14 4h6v6M20 4l-9 9" />
+      <path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+    </>
+  ),
+  locate: (
+    <>
+      <circle cx="12" cy="12" r="7" />
+      <circle cx="12" cy="12" r="2.5" />
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+    </>
+  ),
+  chevron: <path d="m9 6 6 6-6 6" />,
+  'thumbs-down': (
+    <>
+      <path d="M17 14V3" />
+      <path d="M9.5 18.5 10.5 14H5.2a2 2 0 0 1-2-2.4l1.5-7A2 2 0 0 1 6.7 3H20a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-3l-3.8 6.6a1.9 1.9 0 0 1-3.7-2.1Z" />
+    </>
+  ),
 }
 
 export type IconName = keyof typeof paths | 'apple'

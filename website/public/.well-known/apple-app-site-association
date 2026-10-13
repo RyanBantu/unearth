@@ -1,0 +1,10 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["8XCCGLJ4KA.com.ryanbantu.unearth"],
+        "components": [{ "/": "/g/*", "comment": "Gem pages open in the app when it's installed" }]
+      }
+    ]
+  }
+}
