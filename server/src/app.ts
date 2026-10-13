@@ -20,6 +20,14 @@ export async function buildApp() {
     trustProxy: true,
   });
 
+  // iOS builds send Content-Type: application/json on bodyless requests (e.g. DELETE).
+  const defaultJsonParser = app.getDefaultJsonParser("error", "error");
+  app.removeContentTypeParser("application/json");
+  app.addContentTypeParser("application/json", { parseAs: "string" }, (request, body, done) => {
+    if (body === "") return done(null, undefined);
+    defaultJsonParser(request, body as string, done);
+  });
+
   await app.register(cors, {
     origin: true,
   });

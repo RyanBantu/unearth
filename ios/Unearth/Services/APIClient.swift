@@ -364,7 +364,9 @@ actor APIClient {
 
         var request = URLRequest(url: url)
         request.httpMethod = method
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if bodyData != nil {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
         if let accessToken {
             request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         }
