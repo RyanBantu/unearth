@@ -20,6 +20,8 @@ export type UserRow = {
   handle: string | null;
   apple_refresh_token_enc: string | null;
   created_at: Date;
+  agreed_terms_at: Date | null;
+  banned_at: Date | null;
 };
 
 export type GemRow = {

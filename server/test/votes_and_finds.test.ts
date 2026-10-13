@@ -43,7 +43,16 @@ async function authAs(app: Awaited<ReturnType<typeof buildApp>>, handle: string)
     payload: { handle },
   });
   assert.equal(res.statusCode, 200, res.body);
-  return res.json() as AuthResponse;
+  const auth = res.json() as AuthResponse;
+  // Terms required before posting gems/finds.
+  const terms = await app.inject({
+    method: "POST",
+    url: "/me/agree-terms",
+    headers: { authorization: `Bearer ${auth.accessToken}` },
+    payload: {},
+  });
+  assert.equal(terms.statusCode, 200, terms.body);
+  return auth;
 }
 
 async function createGem(

@@ -82,7 +82,25 @@ const guidelinesBody = `
   <li>Illegal activity</li>
 </ul>
 <p>Use <strong>Report</strong> on a gem or find if something breaks these guidelines.</p>
-<p><a href="/privacy">Privacy Policy</a></p>
+<p><a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms of Use</a></p>
+`;
+
+const termsBody = `
+<p class="meta">Last updated: 13 October 2026</p>
+<p>By using Unearth you agree to these Terms of Use.</p>
+<h2>Community rules</h2>
+<ul>
+  <li><strong>Public places only</strong> — no private homes, apartments, or places guests are not welcome.</li>
+  <li><strong>No abusive, hateful or sexual content</strong>, spam, scams, or illegal activity.</li>
+  <li>Be honest about locations so other people can actually visit them.</li>
+</ul>
+<h2>Moderation</h2>
+<p>We review reports and remove content that breaks these rules, typically within <strong>24 hours</strong>. We may ban accounts that repeatedly violate the Terms. You can report gems or finds in the app, and block other users so you no longer see their content.</p>
+<h2>Your content</h2>
+<p>You keep ownership of what you post. You grant Unearth a license to show it to other users as part of the service. You can delete your finds or account at any time.</p>
+<h2>Contact</h2>
+<p>Questions: contact the developer on the App Store listing, or open an issue on <a href="https://github.com/RyanBantu/unearth">github.com/RyanBantu/unearth</a>.</p>
+<p><a href="/privacy">Privacy Policy</a> · <a href="/guidelines">Posting Guidelines</a></p>
 `;
 
 export async function legalRoutes(app: FastifyInstance): Promise<void> {
@@ -94,5 +112,9 @@ export async function legalRoutes(app: FastifyInstance): Promise<void> {
     return reply
       .type("text/html; charset=utf-8")
       .send(htmlPage("Posting Guidelines", guidelinesBody));
+  });
+
+  app.get("/terms", async (_request, reply) => {
+    return reply.type("text/html; charset=utf-8").send(htmlPage("Terms of Use", termsBody));
   });
 }

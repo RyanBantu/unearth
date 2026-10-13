@@ -21,6 +21,8 @@ struct User: Identifiable, Hashable, Codable {
     var firstFindsCount: Int
     var prospectorLevel: ProspectorLevel
     var finds: [Find]
+    var agreedTermsAt: Date?
+    var needsTerms: Bool?
 
     var prospectorLevelLabel: String {
         prospectorLevel.rawValue
@@ -31,11 +33,16 @@ struct User: Identifiable, Hashable, Codable {
         return "\(gemsUnearthed) \(noun) unearthed"
     }
 
+    var hasAgreedToTerms: Bool {
+        agreedTermsAt != nil || needsTerms == false
+    }
+
     enum CodingKeys: String, CodingKey {
         case id, handle, appleUserId, gemsUnearthed, finds
         case firstFindsCount
         case firstFinds
         case prospectorLevel = "level"
+        case agreedTermsAt, needsTerms
     }
 
     init(
@@ -45,7 +52,9 @@ struct User: Identifiable, Hashable, Codable {
         gemsUnearthed: Int = 0,
         firstFindsCount: Int = 0,
         prospectorLevel: ProspectorLevel = .digger,
-        finds: [Find] = []
+        finds: [Find] = [],
+        agreedTermsAt: Date? = .now,
+        needsTerms: Bool? = false
     ) {
         self.id = id
         self.handle = handle
@@ -54,6 +63,8 @@ struct User: Identifiable, Hashable, Codable {
         self.firstFindsCount = firstFindsCount
         self.prospectorLevel = prospectorLevel
         self.finds = finds
+        self.agreedTermsAt = agreedTermsAt
+        self.needsTerms = needsTerms
     }
 
     init(from decoder: Decoder) throws {
@@ -69,6 +80,8 @@ struct User: Identifiable, Hashable, Codable {
         }
         prospectorLevel = try container.decodeIfPresent(ProspectorLevel.self, forKey: .prospectorLevel) ?? .digger
         finds = try container.decodeIfPresent([Find].self, forKey: .finds) ?? []
+        agreedTermsAt = try container.decodeIfPresent(Date.self, forKey: .agreedTermsAt)
+        needsTerms = try container.decodeIfPresent(Bool.self, forKey: .needsTerms)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -80,6 +93,8 @@ struct User: Identifiable, Hashable, Codable {
         try container.encode(firstFindsCount, forKey: .firstFindsCount)
         try container.encode(prospectorLevel, forKey: .prospectorLevel)
         try container.encode(finds, forKey: .finds)
+        try container.encodeIfPresent(agreedTermsAt, forKey: .agreedTermsAt)
+        try container.encodeIfPresent(needsTerms, forKey: .needsTerms)
     }
 }
 
@@ -91,6 +106,8 @@ extension User {
         gemsUnearthed: 7,
         firstFindsCount: 3,
         prospectorLevel: .prospector,
-        finds: Find.mocks
+        finds: Find.mocks,
+        agreedTermsAt: .now,
+        needsTerms: false
     )
 }

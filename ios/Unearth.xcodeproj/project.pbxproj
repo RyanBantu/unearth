@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DE670AED26724EB5889E5201 /* BlockedUsersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29B21F4FFB9447FBAF0DA04D /* BlockedUsersView.swift */; };
+		5772F3346BD14EC486A13ABF /* TermsAgreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA40774FA9F49BD984F172D /* TermsAgreeView.swift */; };
 		6C68171840BC4C2DB96FE0BA /* VoteRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72FC1A29FC4FEFA6B0C778 /* VoteRow.swift */; };
 		0013A0176601E7009DACB4A5 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E53DB82A53CCF23E9A9E991 /* SignInView.swift */; };
 		0211CD9CC160959E064ED6C7 /* ShareOfferSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2749C7D365FE4FD3F101CA8 /* ShareOfferSheet.swift */; };
@@ -61,6 +63,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		29B21F4FFB9447FBAF0DA04D /* BlockedUsersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockedUsersView.swift; sourceTree = "<group>"; };
+		2AA40774FA9F49BD984F172D /* TermsAgreeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsAgreeView.swift; sourceTree = "<group>"; };
 		DA72FC1A29FC4FEFA6B0C778 /* VoteRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoteRow.swift; sourceTree = "<group>"; };
 		0083A213A793C6B0A592BA8D /* Unearth.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Unearth.entitlements; sourceTree = "<group>"; };
 		00A048782079ECEA307A04FF /* GemPinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GemPinView.swift; sourceTree = "<group>"; };
@@ -276,6 +280,7 @@
 				A00A5740E63FB6BE5068E1C2 /* LocationPermissionView.swift */,
 				89250ABAC52C02F2D97574FB /* OnboardingFlowView.swift */,
 				B06EE049D01B49F3202B651F /* PickHandleView.swift */,
+				2AA40774FA9F49BD984F172D /* TermsAgreeView.swift */,
 				2E53DB82A53CCF23E9A9E991 /* SignInView.swift */,
 			);
 			path = Onboarding;
@@ -310,6 +315,7 @@
 			isa = PBXGroup;
 			children = (
 				2C71195FA3BED6B69C4163F8 /* ProfileView.swift */,
+				29B21F4FFB9447FBAF0DA04D /* BlockedUsersView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -414,9 +420,11 @@
 				4C0F73931744C0008A757567 /* OnboardingFlowView.swift in Sources */,
 				84081EA3DB4AA0A47E3706F0 /* OutlineButton.swift in Sources */,
 				84386A1903380AE8D7C9C17C /* PickHandleView.swift in Sources */,
+				5772F3346BD14EC486A13ABF /* TermsAgreeView.swift in Sources */,
 				E41AF36A99B80E49BFD97C49 /* PlaceSearchService.swift in Sources */,
 				829FACA8EB81BC474FE5AE85 /* PrimaryButton.swift in Sources */,
 				A291BD561487DF3640CD4E94 /* ProfileView.swift in Sources */,
+				DE670AED26724EB5889E5201 /* BlockedUsersView.swift in Sources */,
 				F7F1D04FD8CE8E4F17B682E1 /* RootView.swift in Sources */,
 				EBF743E1BCAF99CF13ECCB85 /* RoundIconButton.swift in Sources */,
 				A0AC595309A36EB8356A8E6C /* ScreenStates.swift in Sources */,

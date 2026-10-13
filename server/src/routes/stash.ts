@@ -29,6 +29,25 @@ export async function stashRoutes(app: FastifyInstance): Promise<void> {
       from stash s
       join gems g on g.id = s.gem_id
       where s.user_id = ${request.user.id}
+        and g.hidden_at is null
+        and not exists (
+          select 1 from reports r
+          where r.reporter_id = ${request.user.id}
+            and r.gem_id = g.id
+            and r.find_id is null
+        )
+        and exists (
+          select 1 from finds f
+          where f.gem_id = g.id
+            and not exists (
+              select 1 from blocks b
+              where b.blocker_id = ${request.user.id} and b.blocked_id = f.user_id
+            )
+            and not exists (
+              select 1 from reports r
+              where r.reporter_id = ${request.user.id} and r.find_id = f.id
+            )
+        )
       order by s.created_at desc
     `;
 

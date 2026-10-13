@@ -6,15 +6,47 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if auth.isAuthenticated, auth.hasCompletedOnboarding {
-                HomeShellView(auth: auth, locationService: locationService)
+            #if DEBUG
+            if let scene = ScreenshotScene.current {
+                screenshotScene(scene)
             } else {
-                OnboardingFlowView(auth: auth, locationService: locationService)
+                mainContent
             }
+            #else
+            mainContent
+            #endif
         }
         .preferredColorScheme(.light)
         .tint(UnearthColor.green)
     }
+
+    @ViewBuilder
+    private var mainContent: some View {
+        if auth.isAuthenticated, auth.hasCompletedOnboarding, !auth.needsTerms {
+            HomeShellView(auth: auth, locationService: locationService)
+        } else if auth.isAuthenticated, auth.hasCompletedOnboarding, auth.needsTerms {
+            // Existing accounts that signed up before Terms — must agree before Dig.
+            TermsAgreeView(auth: auth) {}
+        } else {
+            OnboardingFlowView(auth: auth, locationService: locationService)
+        }
+    }
+
+    #if DEBUG
+    @ViewBuilder
+    private func screenshotScene(_ scene: ScreenshotScene) -> some View {
+        switch scene {
+        case .signin:
+            SignInView(auth: auth, onSignedIn: {})
+        case .handle:
+            PickHandleView(auth: auth, onContinue: {})
+        case .location:
+            LocationPermissionView(locationService: locationService, onContinue: {})
+        case .dig, .digList, .gem, .unearth, .stash, .activity, .profile, .share:
+            HomeShellView(auth: auth, locationService: locationService)
+        }
+    }
+    #endif
 }
 
 #Preview("RootView") {

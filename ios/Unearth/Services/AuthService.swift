@@ -13,6 +13,7 @@ final class AuthService {
     private(set) var hasCompletedOnboarding = false
     private(set) var pendingAppleUserId: String?
     private(set) var needsHandle = false
+    private(set) var needsTerms = false
     /// Last auth error to show in the UI (e.g. Render missing APPLE_* keys).
     private(set) var lastError: String?
 
@@ -82,14 +83,35 @@ final class AuthService {
             persist(user: response.user)
             isAuthenticated = true
             needsHandle = response.needsHandle ?? response.user.handle.isEmpty
-            if !needsHandle {
+            needsTerms = response.needsTerms ?? !response.user.hasAgreedToTerms
+            // Only skip onboarding UI when handle + terms are already done.
+            if !needsHandle, !needsTerms {
                 hasCompletedOnboarding = true
                 UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
+            } else {
+                hasCompletedOnboarding = false
+                UserDefaults.standard.set(false, forKey: DefaultsKeys.onboardingComplete)
             }
             return true
         } catch {
             lastError = error.localizedDescription
             print("Sign in with Apple API failed: \(error)")
+            return false
+        }
+    }
+
+    /// Returns `true` when the server recorded Terms agreement.
+    @discardableResult
+    func agreeToTerms() async -> Bool {
+        lastError = nil
+        do {
+            let user = try await APIClient.shared.agreeToTerms()
+            persist(user: user)
+            needsTerms = false
+            return true
+        } catch {
+            lastError = error.localizedDescription
+            print("Agree terms failed: \(error)")
             return false
         }
     }
@@ -107,8 +129,7 @@ final class AuthService {
             persist(user: user)
             needsHandle = false
             isAuthenticated = true
-            hasCompletedOnboarding = true
-            UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
+            // Location permission is the last step — don't mark complete here.
             return true
         } catch {
             lastError = error.localizedDescription
@@ -149,7 +170,8 @@ final class AuthService {
                 persist(user: response.user)
                 isAuthenticated = true
                 needsHandle = response.needsHandle ?? response.user.handle.isEmpty
-                if !needsHandle {
+                needsTerms = response.needsTerms ?? !response.user.hasAgreedToTerms
+                if !needsHandle, !needsTerms {
                     hasCompletedOnboarding = true
                     UserDefaults.standard.set(true, forKey: DefaultsKeys.onboardingComplete)
                 }
@@ -184,6 +206,8 @@ final class AuthService {
             let user = try await APIClient.shared.me()
             persist(user: user)
             isAuthenticated = true
+            needsTerms = !user.hasAgreedToTerms
+            needsHandle = user.handle.isEmpty
         } catch {
             // Keep cached user
         }
@@ -193,6 +217,7 @@ final class AuthService {
     func applyLoadedUser(_ user: User) {
         persist(user: user)
         isAuthenticated = true
+        needsTerms = !user.hasAgreedToTerms
     }
 
     // MARK: - Private
@@ -212,6 +237,7 @@ final class AuthService {
         hasCompletedOnboarding = false
         pendingAppleUserId = nil
         needsHandle = false
+        needsTerms = false
         Task { await APIClient.shared.setTokens(access: nil, refresh: nil) }
     }
 

@@ -2,7 +2,15 @@ import { gemStatuses, prospectorLevel } from "./status.js";
 import type { UserRow } from "../db.js";
 
 export function serializeUser(
-  user: Pick<UserRow, "id" | "email" | "display_name" | "handle" | "created_at">,
+  user: Pick<
+    UserRow,
+    | "id"
+    | "email"
+    | "display_name"
+    | "handle"
+    | "created_at"
+    | "agreed_terms_at"
+  >,
   stats?: {
     gemsUnearthed: number;
     firstFinds: number;
@@ -18,6 +26,8 @@ export function serializeUser(
     displayName: user.display_name,
     handle: user.handle,
     createdAt: user.created_at,
+    agreedTermsAt: user.agreed_terms_at ?? null,
+    needsTerms: !user.agreed_terms_at,
     ...(stats
       ? {
           gemsUnearthed: stats.gemsUnearthed,

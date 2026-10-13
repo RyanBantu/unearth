@@ -10,6 +10,8 @@ struct GemDetailView: View {
     var onStashChanged: (() -> Void)? = nil
     var onGemUpdated: ((Gem) -> Void)? = nil
     var onFindDeleted: ((gemDeleted: Bool, message: String)) -> Void = { _ in }
+    var onBlockedUser: (() -> Void)? = nil
+    var currentUserId: UUID? = nil
 
     @State private var lookAroundScene: MKLookAroundScene?
     @State private var showLookAround = false
@@ -20,8 +22,15 @@ struct GemDetailView: View {
     @State private var isRefreshing = false
     @State private var showDeleteConfirm = false
     @State private var isDeletingFind = false
+    @State private var blockTarget: BlockTarget?
 
     private let firstFindBodyColor = Color(hex: 0x2A3530)
+
+    private struct BlockTarget: Identifiable, Equatable {
+        var id: UUID { userId }
+        var userId: UUID
+        var handle: String
+    }
 
     private enum ReportTarget: Identifiable, Equatable {
         case gem
@@ -42,7 +51,9 @@ struct GemDetailView: View {
         onFoundItToo: ((Gem) -> Void)? = nil,
         onStashChanged: (() -> Void)? = nil,
         onGemUpdated: ((Gem) -> Void)? = nil,
-        onFindDeleted: @escaping ((gemDeleted: Bool, message: String)) -> Void = { _ in }
+        onFindDeleted: @escaping ((gemDeleted: Bool, message: String)) -> Void = { _ in },
+        onBlockedUser: (() -> Void)? = nil,
+        currentUserId: UUID? = nil
     ) {
         _gem = State(initialValue: gem)
         self.userLocation = userLocation
@@ -51,6 +62,8 @@ struct GemDetailView: View {
         self.onStashChanged = onStashChanged
         self.onGemUpdated = onGemUpdated
         self.onFindDeleted = onFindDeleted
+        self.onBlockedUser = onBlockedUser
+        self.currentUserId = currentUserId
     }
 
     var body: some View {
@@ -85,6 +98,24 @@ struct GemDetailView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text(deleteAlertMessage)
+        }
+        .alert(
+            blockTarget.map { "Block @\($0.handle)?" } ?? "Block user?",
+            isPresented: Binding(
+                get: { blockTarget != nil },
+                set: { if !$0 { blockTarget = nil } }
+            )
+        ) {
+            Button("Block", role: .destructive) {
+                Task { await confirmBlock() }
+            }
+            Button("Cancel", role: .cancel) {
+                blockTarget = nil
+            }
+        } message: {
+            if let blockTarget {
+                Text("You won't see gems or finds from @\(blockTarget.handle).")
+            }
         }
         .task {
             await loadLookAround()
@@ -155,6 +186,11 @@ struct GemDetailView: View {
                     reportTarget = .gem
                 }
             }
+            if let target = primaryBlockTarget {
+                Button("Block @\(target.handle)", role: .destructive) {
+                    blockTarget = target
+                }
+            }
         } label: {
             Image(systemName: "ellipsis")
                 .font(.system(size: 17, weight: .semibold))
@@ -164,6 +200,13 @@ struct GemDetailView: View {
                 .clipShape(Circle())
                 .floatingShadow()
         }
+    }
+
+    /// First finder (or first visible find author) who isn't me.
+    private var primaryBlockTarget: BlockTarget? {
+        let candidates = [gem.firstFind].compactMap { $0 } + gem.otherFinds
+        guard let find = candidates.first(where: { $0.userId != currentUserId }) else { return nil }
+        return BlockTarget(userId: find.userId, handle: find.handle)
     }
 
     private var headerMapStyle: MapStyle {
@@ -396,7 +439,17 @@ struct GemDetailView: View {
                             .font(UnearthFont.bodySmall())
                             .foregroundStyle(UnearthColor.amber)
                     }
-                    reportFindButton(findId: find.id)
+                    HStack(spacing: 16) {
+                        reportFindButton(findId: find.id)
+                        if find.userId != currentUserId {
+                            Button("Block @\(find.handle)") {
+                                blockTarget = BlockTarget(userId: find.userId, handle: find.handle)
+                            }
+                            .font(UnearthFont.bodySmall())
+                            .foregroundStyle(UnearthColor.inkTertiary)
+                            .buttonStyle(.plain)
+                        }
+                    }
                 }
                 .padding(.vertical, 12)
                 if find.id != gem.otherFinds.last?.id {
@@ -625,7 +678,25 @@ struct GemDetailView: View {
                     ReportBody(gemId: gem.id, findId: findId, reason: reason)
                 )
             }
-            toastMessage = "Thanks — we received your report"
+            toastMessage = "Thanks — we'll review this within 24 hours."
+            // Reported find/gem is hidden for this viewer — refresh or leave.
+            if case .find = target {
+                await refreshFromAPI()
+            } else {
+                onBlockedUser?()
+            }
+        } catch {
+            toastMessage = error.localizedDescription
+        }
+    }
+
+    private func confirmBlock() async {
+        guard let target = blockTarget else { return }
+        blockTarget = nil
+        do {
+            try await APIClient.shared.blockUser(id: target.userId)
+            toastMessage = "Blocked @\(target.handle)"
+            onBlockedUser?()
         } catch {
             toastMessage = error.localizedDescription
         }

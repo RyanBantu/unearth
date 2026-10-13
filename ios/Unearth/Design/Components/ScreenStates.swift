@@ -88,6 +88,7 @@ enum ScreenStates {
 enum UnearthLinks {
     static let privacyPolicy = URL(string: "https://unearth-1o4a.onrender.com/privacy")!
     static let postingGuidelines = URL(string: "https://unearth-1o4a.onrender.com/guidelines")!
+    static let termsOfUse = URL(string: "https://unearth-1o4a.onrender.com/terms")!
 }
 
 #Preview("ScreenStates") {

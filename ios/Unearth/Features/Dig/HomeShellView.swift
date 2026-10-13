@@ -112,6 +112,7 @@ struct HomeShellView: View {
             GemDetailHost(
                 gemId: item.id,
                 userLocation: locationService.currentLocation,
+                currentUserId: auth.currentUser?.id,
                 onClose: { presentedGem = nil },
                 onFoundItToo: { foundGem in
                     reopenGemAfterFind = foundGem.id
@@ -141,6 +142,16 @@ struct HomeShellView: View {
                     }
                     stashReloadToken += 1
                     Task { await loadStash() }
+                },
+                onContentHidden: { gemId in
+                    presentedGem = nil
+                    digViewModel.removeGem(id: gemId)
+                    Task {
+                        await digViewModel.reloadNearby(
+                            fallback: locationService.currentLocation?.coordinate
+                        )
+                        await loadStash()
+                    }
                 }
             )
         }
@@ -247,11 +258,13 @@ private struct PresentedGem: Identifiable, Hashable {
 private struct GemDetailHost: View {
     let gemId: UUID
     var userLocation: CLLocation?
+    var currentUserId: UUID?
     var onClose: () -> Void
     var onFoundItToo: (Gem) -> Void
     var onStashChanged: () -> Void
     var onGemUpdated: (Gem) -> Void
     var onFindDeleted: (_ gemId: UUID, _ gemDeleted: Bool, _ message: String) -> Void
+    var onContentHidden: (_ gemId: UUID) -> Void
 
     @State private var detail: Gem?
     @State private var errorMessage: String?
@@ -269,7 +282,11 @@ private struct GemDetailHost: View {
                     onGemUpdated: onGemUpdated,
                     onFindDeleted: { result in
                         onFindDeleted(gemId, result.gemDeleted, result.message)
-                    }
+                    },
+                    onBlockedUser: {
+                        onContentHidden(gemId)
+                    },
+                    currentUserId: currentUserId
                 )
                 .task(id: gemId) {
                     // Refresh when reopened after “I found it too”.

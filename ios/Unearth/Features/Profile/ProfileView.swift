@@ -212,6 +212,12 @@ struct ProfileView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             settingsLink(
+                title: "Terms of Use",
+                subtitle: "Community rules and moderation",
+                url: UnearthLinks.termsOfUse
+            )
+
+            settingsLink(
                 title: "Privacy policy",
                 subtitle: "How Unearth uses your data",
                 url: UnearthLinks.privacyPolicy
@@ -222,6 +228,17 @@ struct ProfileView: View {
                 subtitle: "Public places only",
                 url: UnearthLinks.postingGuidelines
             )
+
+            NavigationLink {
+                BlockedUsersView()
+            } label: {
+                settingsRow(
+                    title: "Blocked users",
+                    subtitle: "Manage people you’ve blocked",
+                    trailingSystemImage: "chevron.right"
+                )
+            }
+            .buttonStyle(.plain)
 
             OutlineButton(title: "Sign out") {
                 onSignOut()
@@ -244,30 +261,34 @@ struct ProfileView: View {
 
     private func settingsLink(title: String, subtitle: String, url: URL) -> some View {
         Link(destination: url) {
-            HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(UnearthFont.button())
-                        .foregroundStyle(UnearthColor.ink)
-                    Text(subtitle)
-                        .font(UnearthFont.bodySmall())
-                        .foregroundStyle(UnearthColor.inkSecondary)
-                }
-                Spacer(minLength: 0)
-                Image(systemName: "arrow.up.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(UnearthColor.green)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
-            .background(UnearthColor.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(UnearthColor.border, lineWidth: 1)
-            }
+            settingsRow(title: title, subtitle: subtitle, trailingSystemImage: "arrow.up.right")
         }
         .buttonStyle(.plain)
+    }
+
+    private func settingsRow(title: String, subtitle: String, trailingSystemImage: String) -> some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(UnearthFont.button())
+                    .foregroundStyle(UnearthColor.ink)
+                Text(subtitle)
+                    .font(UnearthFont.bodySmall())
+                    .foregroundStyle(UnearthColor.inkSecondary)
+            }
+            Spacer(minLength: 0)
+            Image(systemName: trailingSystemImage)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(UnearthColor.green)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(UnearthColor.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(UnearthColor.border, lineWidth: 1)
+        }
     }
 
     private func confirmDeleteFind() async {

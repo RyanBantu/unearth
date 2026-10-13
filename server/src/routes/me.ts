@@ -67,6 +67,19 @@ export async function meRoutes(app: FastifyInstance): Promise<void> {
     };
   });
 
+  app.post("/me/agree-terms", { preHandler: requireAuth }, async (request) => {
+    const updated = await sql<UserRow[]>`
+      update users
+      set agreed_terms_at = coalesce(agreed_terms_at, now())
+      where id = ${request.user.id}
+      returning id, apple_sub, email, display_name, handle,
+                apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
+    `;
+    const user = updated[0]!;
+    const stats = await userStats(user.id);
+    return serializeUser(user, stats);
+  });
+
   app.put("/me/handle", { preHandler: requireAuth }, async (request, reply) => {
     const parsed = handleBody.safeParse(request.body);
     if (!parsed.success) {
@@ -87,7 +100,7 @@ export async function meRoutes(app: FastifyInstance): Promise<void> {
       set handle = ${handle}
       where id = ${request.user.id}
       returning id, apple_sub, email, display_name, handle,
-                apple_refresh_token_enc, created_at
+                apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
     `;
     const user = updated[0]!;
     const stats = await userStats(user.id);

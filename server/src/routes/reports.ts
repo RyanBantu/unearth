@@ -20,15 +20,19 @@ export async function reportsRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: "Invalid body", details: parsed.error.flatten() });
     }
 
-    const { gemId, findId, reason } = parsed.data;
+    let { gemId, findId, reason } = parsed.data;
 
+    if (findId) {
+      const finds = await sql<{ id: string; gem_id: string }[]>`
+        select id, gem_id from finds where id = ${findId} limit 1
+      `;
+      if (!finds[0]) return reply.code(404).send({ error: "Find not found" });
+      // Ensure gem_id is set so admin tooling can navigate.
+      gemId = gemId ?? finds[0].gem_id;
+    }
     if (gemId) {
       const gems = await sql<{ id: string }[]>`select id from gems where id = ${gemId} limit 1`;
       if (!gems[0]) return reply.code(404).send({ error: "Gem not found" });
-    }
-    if (findId) {
-      const finds = await sql<{ id: string }[]>`select id from finds where id = ${findId} limit 1`;
-      if (!finds[0]) return reply.code(404).send({ error: "Find not found" });
     }
 
     const rows = await sql`
@@ -42,9 +46,12 @@ export async function reportsRoutes(app: FastifyInstance): Promise<void> {
       returning id, created_at
     `;
 
+    // Reported content is immediately hidden from this reporter via query filters.
     return reply.code(201).send({
       id: rows[0]!.id,
       createdAt: rows[0]!.created_at,
+      hidden: true,
+      message: "Thanks — we'll review this within 24 hours.",
     });
   });
 }

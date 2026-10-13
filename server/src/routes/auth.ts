@@ -75,7 +75,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
     const existing = await sql<UserRow[]>`
       select id, apple_sub, email, display_name, handle,
-             apple_refresh_token_enc, created_at
+             apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
       from users
       where apple_sub = ${identity.sub}
       limit 1
@@ -105,9 +105,13 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
           ${encRefresh}
         )
         returning id, apple_sub, email, display_name, handle,
-                  apple_refresh_token_enc, created_at
+                  apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
       `;
       user = inserted[0]!;
+    }
+
+    if (user.banned_at) {
+      return reply.code(403).send({ error: "Account banned" });
     }
 
     const tokens = await issueTokenPair(user.id);
@@ -117,6 +121,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       refreshToken: tokens.refreshToken,
       user: serializeUser(user),
       needsHandle: !user.handle,
+      needsTerms: !user.agreed_terms_at,
     };
   });
 
@@ -133,7 +138,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
     const users = await sql<UserRow[]>`
       select id, apple_sub, email, display_name, handle,
-             apple_refresh_token_enc, created_at
+             apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
       from users
       where id = ${rotated.userId}
       limit 1
@@ -142,12 +147,16 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     if (!user) {
       return reply.code(401).send({ error: "User not found" });
     }
+    if (user.banned_at) {
+      return reply.code(403).send({ error: "Account banned" });
+    }
 
     return {
       accessToken: rotated.accessToken,
       refreshToken: rotated.refreshToken,
       user: serializeUser(user),
       needsHandle: !user.handle,
+      needsTerms: !user.agreed_terms_at,
     };
   });
 
@@ -184,7 +193,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     const appleSub = `dev:${body.data.handle ?? "mock"}`;
     const existing = await sql<UserRow[]>`
       select id, apple_sub, email, display_name, handle,
-             apple_refresh_token_enc, created_at
+             apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
       from users
       where apple_sub = ${appleSub}
       limit 1
@@ -203,9 +212,13 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
           ${body.data.handle ?? "devuser"}
         )
         returning id, apple_sub, email, display_name, handle,
-                  apple_refresh_token_enc, created_at
+                  apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
       `;
       user = inserted[0]!;
+    }
+
+    if (user.banned_at) {
+      return reply.code(403).send({ error: "Account banned" });
     }
 
     const tokens = await issueTokenPair(user.id);
@@ -214,6 +227,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       refreshToken: tokens.refreshToken,
       user: serializeUser(user),
       needsHandle: !user.handle,
+      needsTerms: !user.agreed_terms_at,
     };
   });
 }

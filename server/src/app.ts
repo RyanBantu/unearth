@@ -9,7 +9,9 @@ import { findsRoutes } from "./routes/finds.js";
 import { stashRoutes } from "./routes/stash.js";
 import { activityRoutes } from "./routes/activity.js";
 import { usersRoutes } from "./routes/users.js";
+import { blocksRoutes } from "./routes/blocks.js";
 import { reportsRoutes } from "./routes/reports.js";
+import { adminRoutes } from "./routes/admin.js";
 import { legalRoutes } from "./routes/legal.js";
 
 export async function buildApp() {
@@ -39,7 +41,9 @@ export async function buildApp() {
   await app.register(stashRoutes);
   await app.register(activityRoutes);
   await app.register(usersRoutes);
+  await app.register(blocksRoutes);
   await app.register(reportsRoutes);
+  await app.register(adminRoutes);
 
   return app;
 }

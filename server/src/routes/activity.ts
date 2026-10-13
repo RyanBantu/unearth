@@ -35,6 +35,10 @@ export async function activityRoutes(app: FastifyInstance): Promise<void> {
         join gems g on g.id = f.gem_id
         where g.first_finder_id = ${userId}
           and g.find_count >= ${FIND_COUNT_POLISHED}
+          and not exists (
+            select 1 from blocks b
+            where b.blocker_id = ${userId} and b.blocked_id = f.user_id
+          )
       )
       select gem_id, gem_name, created_at
       from ordered
@@ -65,6 +69,10 @@ export async function activityRoutes(app: FastifyInstance): Promise<void> {
       join gems g on g.id = f.gem_id
       join users u on u.id = f.user_id
       where f.user_id <> ${userId}
+        and not exists (
+          select 1 from blocks b
+          where b.blocker_id = ${userId} and b.blocked_id = f.user_id
+        )
         and exists (
           select 1 from finds mine
           where mine.gem_id = f.gem_id and mine.user_id = ${userId}

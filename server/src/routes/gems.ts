@@ -12,7 +12,8 @@ import {
   MATCH_RADIUS_M,
 } from "../lib/status.js";
 import { clearVote, getMyVote, setVote } from "../lib/votes.js";
-import { requireAuth } from "../middleware/auth.js";
+import { isGemHiddenFromViewer } from "../lib/blocks.js";
+import { requireAuth, requireTerms } from "../middleware/auth.js";
 
 const categoryEnum = z.enum([
   "food",
@@ -100,6 +101,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
     }
 
     const { lat, lng, radius_m, category } = parsed.data;
+    const viewerId = request.user.id;
 
     const rows = category
       ? await sql`
@@ -117,6 +119,24 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
           )
             and category = ${category}
             and hidden_at is null
+            and not exists (
+              select 1 from reports r
+              where r.reporter_id = ${viewerId}
+                and r.gem_id = gems.id
+                and r.find_id is null
+            )
+            and exists (
+              select 1 from finds f
+              where f.gem_id = gems.id
+                and not exists (
+                  select 1 from blocks b
+                  where b.blocker_id = ${viewerId} and b.blocked_id = f.user_id
+                )
+                and not exists (
+                  select 1 from reports r
+                  where r.reporter_id = ${viewerId} and r.find_id = f.id
+                )
+            )
           order by distance_m asc
           limit 100
         `
@@ -134,6 +154,24 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
             ${radius_m}
           )
             and hidden_at is null
+            and not exists (
+              select 1 from reports r
+              where r.reporter_id = ${viewerId}
+                and r.gem_id = gems.id
+                and r.find_id is null
+            )
+            and exists (
+              select 1 from finds f
+              where f.gem_id = gems.id
+                and not exists (
+                  select 1 from blocks b
+                  where b.blocker_id = ${viewerId} and b.blocked_id = f.user_id
+                )
+                and not exists (
+                  select 1 from reports r
+                  where r.reporter_id = ${viewerId} and r.find_id = f.id
+                )
+            )
           order by distance_m asc
           limit 100
         `;
@@ -201,6 +239,11 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(404).send({ error: "Gem not found" });
     }
 
+    if (await isGemHiddenFromViewer(request.user.id, gem.id as string)) {
+      return reply.code(404).send({ error: "Gem not found" });
+    }
+
+    const viewerId = request.user.id;
     const [finds, stashRows, myFind, myVote] = await Promise.all([
       sql`
         select
@@ -210,6 +253,14 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
         from finds f
         join users u on u.id = f.user_id
         where f.gem_id = ${gem.id}
+          and not exists (
+            select 1 from blocks b
+            where b.blocker_id = ${viewerId} and b.blocked_id = f.user_id
+          )
+          and not exists (
+            select 1 from reports r
+            where r.reporter_id = ${viewerId} and r.find_id = f.id
+          )
         order by f.created_at asc
       `,
       sql<{ gem_id: string }[]>`
@@ -261,7 +312,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
   app.post(
     "/gems",
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireTerms],
       config: {
         rateLimit: {
           max: 20,
@@ -381,7 +432,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
   app.post(
     "/gems/:id/finds",
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireTerms],
       config: {
         rateLimit: {
           max: 20,

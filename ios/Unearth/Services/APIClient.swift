@@ -38,6 +38,7 @@ struct AuthTokensResponse: Decodable {
     var refreshToken: String
     var user: User
     var needsHandle: Bool?
+    var needsTerms: Bool?
 }
 
 struct RefreshBody: Encodable {
@@ -85,6 +86,7 @@ struct ReportBody: Encodable {
 }
 
 struct EmptyResponse: Decodable {}
+struct EmptyBody: Encodable {}
 
 actor APIClient {
     static let shared = APIClient()
@@ -162,6 +164,15 @@ actor APIClient {
         )
     }
 
+    func postEmpty(_ path: String) async throws {
+        let _: EmptyResponse = try await request(
+            path: path,
+            method: "POST",
+            bodyData: nil,
+            allowEmptyBody: true
+        )
+    }
+
     func delete<T: Decodable>(_ path: String) async throws -> T {
         try await request(path: path, method: "DELETE", bodyData: nil)
     }
@@ -216,6 +227,23 @@ actor APIClient {
 
     func deleteAccount() async throws {
         try await deleteEmpty("/me")
+    }
+
+    func agreeToTerms() async throws -> User {
+        try await post("/me/agree-terms", body: EmptyBody())
+    }
+
+    func blockUser(id: UUID) async throws {
+        let _: EmptyResponse = try await request(
+            path: "/users/\(id.uuidString)/block",
+            method: "POST",
+            bodyData: try encoder.encode(EmptyBody()),
+            allowEmptyBody: true
+        )
+    }
+
+    func unblockUser(id: UUID) async throws {
+        try await deleteEmpty("/users/\(id.uuidString)/block")
     }
 
     // MARK: - Gems

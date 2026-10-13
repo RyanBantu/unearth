@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { sql, type UserRow } from "../db.js";
+import { isBlocked } from "../lib/blocks.js";
 import { serializeGemStatus, serializeUser } from "../lib/serialize.js";
 import { requireAuth } from "../middleware/auth.js";
 
@@ -18,13 +19,17 @@ export async function usersRoutes(app: FastifyInstance): Promise<void> {
     const handle = parsed.data.handle.toLowerCase().replace(/^@/, "");
     const users = await sql<UserRow[]>`
       select id, apple_sub, email, display_name, handle,
-             apple_refresh_token_enc, created_at
+             apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
       from users
       where handle = ${handle}
       limit 1
     `;
     const user = users[0];
     if (!user) {
+      return reply.code(404).send({ error: "User not found" });
+    }
+
+    if (await isBlocked(request.user.id, user.id)) {
       return reply.code(404).send({ error: "User not found" });
     }
 

@@ -25,3 +25,7 @@ services:
         sync: false
       - key: PORT
         value: "3000"
+      - key: ADMIN_TOKEN
+        sync: false
+      - key: ALLOW_DEV_AUTH
+        value: "false"
