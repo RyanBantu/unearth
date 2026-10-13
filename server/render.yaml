@@ -23,9 +23,17 @@ services:
         sync: false
       - key: APPLE_PRIVATE_KEY
         sync: false
+      - key: APPLE_SERVICES_ID
+        sync: false
       - key: PORT
         value: "3000"
       - key: ADMIN_TOKEN
         sync: false
       - key: ALLOW_DEV_AUTH
         value: "false"
+      - key: WEB_SIGN_IN_ENABLED
+        value: "false"
+      - key: WEB_ORIGIN
+        sync: false
+      - key: PRERENDER_TOKEN
+        sync: false

@@ -51,6 +51,7 @@ export function serializeGemStatus(findCount: number) {
 
 export type MatchCandidateRow = {
   id: string;
+  slug: string | null;
   name: string;
   category: string;
   find_count: number;
@@ -64,6 +65,7 @@ export type MatchCandidateRow = {
 export function serializeMatchCandidate(row: MatchCandidateRow) {
   return {
     id: row.id,
+    slug: row.slug,
     name: row.name,
     category: row.category,
     findCount: row.find_count,

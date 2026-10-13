@@ -22,13 +22,18 @@ export type AppleIdentity = {
   email?: string;
 };
 
+/** iOS tokens are issued to the bundle ID; web tokens to the Services ID. */
+export function appleClientId(kind: "ios" | "web"): string {
+  return kind === "web" ? requireEnv("APPLE_SERVICES_ID") : requireEnv("APPLE_BUNDLE_ID");
+}
+
 export async function verifyAppleIdentityToken(
   identityToken: string,
+  clientId: string = appleClientId("ios"),
 ): Promise<AppleIdentity> {
-  const bundleId = requireEnv("APPLE_BUNDLE_ID");
   const { payload } = await jwtVerify(identityToken, APPLE_JWKS, {
     issuer: APPLE_ISSUER,
-    audience: bundleId,
+    audience: clientId,
   });
 
   if (!payload.sub || typeof payload.sub !== "string") {
@@ -41,10 +46,9 @@ export async function verifyAppleIdentityToken(
   };
 }
 
-async function createAppleClientSecret(): Promise<string> {
+async function createAppleClientSecret(clientId: string): Promise<string> {
   const teamId = requireEnv("APPLE_TEAM_ID");
   const keyId = requireEnv("APPLE_KEY_ID");
-  const bundleId = requireEnv("APPLE_BUNDLE_ID");
   const privateKeyPem = normalizePrivateKey(requireEnv("APPLE_PRIVATE_KEY"));
   const key = createPrivateKey(privateKeyPem);
 
@@ -54,7 +58,7 @@ async function createAppleClientSecret(): Promise<string> {
     .setIssuedAt()
     .setExpirationTime("5m")
     .setAudience(APPLE_ISSUER)
-    .setSubject(bundleId)
+    .setSubject(clientId)
     .sign(key);
 }
 
@@ -68,14 +72,17 @@ export type AppleTokenResponse = {
 
 export async function exchangeAppleAuthorizationCode(
   authorizationCode: string,
+  opts: { clientId?: string; redirectUri?: string } = {},
 ): Promise<AppleTokenResponse> {
-  const clientSecret = await createAppleClientSecret();
+  const clientId = opts.clientId ?? appleClientId("ios");
+  const clientSecret = await createAppleClientSecret(clientId);
   const body = new URLSearchParams({
-    client_id: requireEnv("APPLE_BUNDLE_ID"),
+    client_id: clientId,
     client_secret: clientSecret,
     code: authorizationCode,
     grant_type: "authorization_code",
   });
+  if (opts.redirectUri) body.set("redirect_uri", opts.redirectUri);
 
   const res = await fetch("https://appleid.apple.com/auth/token", {
     method: "POST",
@@ -91,10 +98,13 @@ export async function exchangeAppleAuthorizationCode(
   return (await res.json()) as AppleTokenResponse;
 }
 
-export async function revokeAppleToken(refreshToken: string): Promise<void> {
-  const clientSecret = await createAppleClientSecret();
+export async function revokeAppleToken(
+  refreshToken: string,
+  clientId: string = appleClientId("ios"),
+): Promise<void> {
+  const clientSecret = await createAppleClientSecret(clientId);
   const body = new URLSearchParams({
-    client_id: requireEnv("APPLE_BUNDLE_ID"),
+    client_id: clientId,
     client_secret: clientSecret,
     token: refreshToken,
     token_type_hint: "refresh_token",

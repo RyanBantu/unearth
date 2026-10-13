@@ -7,7 +7,9 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 config({ path: resolve(__dirname, "../.env") });
 
+process.env.NODE_ENV = "development";
 process.env.ALLOW_DEV_AUTH = "true";
+process.env.GEOCODING_DISABLED = "true";
 
 const { buildApp } = await import("../src/app.js");
 const { sql } = await import("../src/db.js");

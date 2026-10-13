@@ -19,6 +19,7 @@ export async function findDuplicateCandidates(params: {
     const byPlace = await sql<MatchCandidateRow[]>`
       select
         id,
+        slug,
         name,
         category,
         find_count,
@@ -41,6 +42,7 @@ export async function findDuplicateCandidates(params: {
   return sql<MatchCandidateRow[]>`
     select
       id,
+      slug,
       name,
       category,
       find_count,

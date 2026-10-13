@@ -89,6 +89,21 @@ export async function rotateRefreshToken(refreshToken: string): Promise<{
   return { ...pair, userId: row.user_id };
 }
 
+/** Web sessions reuse refresh tokens: the opaque token lives in an HttpOnly cookie. */
+export const WEB_SESSION_TTL_SEC = REFRESH_TTL_MS / 1000;
+
+export async function sessionUserId(token: string): Promise<string | null> {
+  const rows = await sql<{ user_id: string }[]>`
+    select user_id
+    from refresh_tokens
+    where token_hash = ${sha256Hex(token)}
+      and revoked_at is null
+      and expires_at > now()
+    limit 1
+  `;
+  return rows[0]?.user_id ?? null;
+}
+
 export async function revokeRefreshToken(refreshToken: string): Promise<void> {
   const tokenHash = sha256Hex(refreshToken);
   await sql`

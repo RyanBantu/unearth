@@ -3,7 +3,7 @@ import { z } from "zod";
 import { sql, type UserRow } from "../db.js";
 import { HANDLE_REGEX } from "../lib/status.js";
 import { serializeUser } from "../lib/serialize.js";
-import { requireAuth } from "../middleware/auth.js";
+import { requireAuth, SESSION_COOKIE } from "../middleware/auth.js";
 import { revokeAppleForUser } from "./auth.js";
 
 const handleBody = z.object({
@@ -39,6 +39,7 @@ export async function meRoutes(app: FastifyInstance): Promise<void> {
           f.id, f.gem_id, f.user_id, f.description, f.liked, f.disliked,
           f.tags, f.created_at,
           g.name as gem_name,
+          g.slug as gem_slug,
           g.find_count as gem_find_count,
           (g.first_finder_id = ${userId}) as is_first_find
         from finds f
@@ -54,6 +55,7 @@ export async function meRoutes(app: FastifyInstance): Promise<void> {
         id: f.id,
         gemId: f.gem_id,
         gemName: f.gem_name,
+        gemSlug: f.gem_slug,
         userId: f.user_id,
         handle: request.user.handle,
         description: f.description,
@@ -110,6 +112,7 @@ export async function meRoutes(app: FastifyInstance): Promise<void> {
   app.delete("/me", { preHandler: requireAuth }, async (request, reply) => {
     await revokeAppleForUser(request.user);
     await sql`delete from users where id = ${request.user.id}`;
+    reply.clearCookie(SESSION_COOKIE, { path: "/" });
     return reply.code(204).send();
   });
 }

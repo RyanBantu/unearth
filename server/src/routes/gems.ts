@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { sql } from "../db.js";
+import type { PendingQuery, Row } from "postgres";
 import { findDuplicateCandidates } from "../lib/matching.js";
 import {
   serializeGemStatus,
@@ -13,7 +14,11 @@ import {
 } from "../lib/status.js";
 import { clearVote, getMyVote, setVote } from "../lib/votes.js";
 import { isGemHiddenFromViewer } from "../lib/blocks.js";
-import { requireAuth, requireTerms } from "../middleware/auth.js";
+import { optionalAuth, requireAuth, requireTerms } from "../middleware/auth.js";
+import { gemSlug, isSlugConflict, SLUG_REGEX } from "../lib/slug.js";
+import type { UserRow } from "../db.js";
+import { fillPlaceInBackground, placeColumns } from "../lib/places.js";
+import { publicRateLimit } from "../lib/publicGems.js";
 
 const categoryEnum = z.enum([
   "food",
@@ -48,6 +53,14 @@ const gemIdParams = z.object({
   id: z.string().uuid(),
 });
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const gemIdOrSlugParams = z.object({
+  id: z.string().max(80).refine((v) => UUID_REGEX.test(v) || SLUG_REGEX.test(v)),
+});
+
+const placeField = z.string().trim().max(120).optional().nullable();
+
 const createGemBody = z.object({
   name: z.string().trim().min(1).max(200),
   category: categoryEnum,
@@ -69,6 +82,10 @@ const createGemBody = z.object({
   disliked: z.string().trim().max(140).optional().nullable(),
   tags: tagsSchema,
   confirmedNew: z.boolean().optional(),
+  /** Optional, e.g. from CLGeocoder; otherwise the server reverse-geocodes. */
+  city: placeField,
+  area: placeField,
+  country: placeField,
 });
 
 const createFindBody = z.object({
@@ -93,6 +110,98 @@ function voteRateLimitByUser(request: FastifyRequest): string {
   return auth ? `vote:${auth}` : `vote:ip:${request.ip}`;
 }
 
+/** Gem + visible finds for this viewer (signed out when null), or null if missing / hidden. */
+async function gemDetail(where: PendingQuery<Row[]>, viewer: UserRow | null) {
+  const gems = await sql`
+    select
+      id, slug, name, category, address, apple_place_id, google_maps_url,
+      first_finder_id, find_count, upvotes, downvotes, created_at,
+      city, area, country, city_slug, area_slug,
+      st_y(location::geometry) as lat,
+      st_x(location::geometry) as lng
+    from gems
+    where ${where}
+    limit 1
+  `;
+  const gem = gems[0];
+  if (!gem) return null;
+
+  const viewerId = viewer?.id ?? null;
+  if (await isGemHiddenFromViewer(viewerId, gem.id as string)) return null;
+
+  const [finds, stashRows, myVote] = await Promise.all([
+    sql`
+      select
+        f.id, f.gem_id, f.user_id, f.description, f.liked, f.disliked,
+        f.tags, f.created_at,
+        u.handle, u.display_name
+      from finds f
+      join users u on u.id = f.user_id
+      where f.gem_id = ${gem.id}
+        and not exists (
+          select 1 from blocks b
+          where b.blocker_id = ${viewerId} and b.blocked_id = f.user_id
+        )
+        and not exists (
+          select 1 from reports r
+          where r.reporter_id = ${viewerId} and r.find_id = f.id
+        )
+      order by f.created_at asc
+    `,
+    viewerId
+      ? sql<{ gem_id: string }[]>`
+          select gem_id from stash
+          where user_id = ${viewerId} and gem_id = ${gem.id}
+          limit 1
+        `
+      : [],
+    viewerId ? getMyVote(gem.id as string, viewerId) : null,
+  ]);
+  const myFind = viewerId ? finds.find((f) => f.user_id === viewerId) : undefined;
+  const firstFind = finds.find((f) => f.user_id === gem.first_finder_id);
+
+  return {
+    id: gem.id,
+    slug: gem.slug,
+    name: gem.name,
+    category: gem.category,
+    address: gem.address,
+    city: gem.city,
+    area: gem.area,
+    country: gem.country,
+    citySlug: gem.city_slug,
+    areaSlug: gem.area_slug,
+    findCount: Number(gem.find_count),
+    firstFinderHandle: firstFind?.handle ?? null,
+    applePlaceId: gem.apple_place_id,
+    googleMapsUrl: gem.google_maps_url,
+    firstFinderId: gem.first_finder_id,
+    createdAt: gem.created_at,
+    lat: Number(gem.lat),
+    lng: Number(gem.lng),
+    status: serializeGemStatus(Number(gem.find_count)),
+    upvotes: Number(gem.upvotes),
+    downvotes: Number(gem.downvotes),
+    myVote,
+    isStashed: stashRows.length > 0,
+    myFindId: myFind?.id ?? null,
+    finds: finds.map((f) => ({
+      id: f.id,
+      gemId: f.gem_id,
+      userId: f.user_id,
+      description: f.description,
+      liked: f.liked,
+      disliked: f.disliked,
+      tags: f.tags,
+      createdAt: f.created_at,
+      handle: f.handle,
+      // Apple names are often real names: only shown to signed-in app users.
+      displayName: viewer ? f.display_name : null,
+      isFirstFind: f.user_id === gem.first_finder_id,
+    })),
+  };
+}
+
 export async function gemsRoutes(app: FastifyInstance): Promise<void> {
   app.get("/gems/nearby", { preHandler: requireAuth }, async (request, reply) => {
     const parsed = nearbyQuery.safeParse(request.query);
@@ -106,7 +215,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
     const rows = category
       ? await sql`
           select
-            id, name, category, address, apple_place_id, google_maps_url,
+            id, slug, name, category, address, apple_place_id, google_maps_url,
             first_finder_id, find_count, upvotes, downvotes, created_at,
             st_y(location::geometry) as lat,
             st_x(location::geometry) as lng,
@@ -142,7 +251,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
         `
       : await sql`
           select
-            id, name, category, address, apple_place_id, google_maps_url,
+            id, slug, name, category, address, apple_place_id, google_maps_url,
             first_finder_id, find_count, upvotes, downvotes, created_at,
             st_y(location::geometry) as lat,
             st_x(location::geometry) as lng,
@@ -179,6 +288,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
     return {
       gems: rows.map((g) => ({
         id: g.id,
+        slug: g.slug,
         name: g.name,
         category: g.category,
         address: g.address,
@@ -218,96 +328,22 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
     };
   });
 
-  app.get("/gems/:id", { preHandler: requireAuth }, async (request, reply) => {
-    const parsed = gemIdParams.safeParse(request.params);
+  /** Public: `:id` is a gem UUID (iOS) or slug (website). */
+  app.get(
+    "/gems/:id",
+    { preHandler: optionalAuth, config: publicRateLimit },
+    async (request, reply) => {
+    const parsed = gemIdOrSlugParams.safeParse(request.params);
     if (!parsed.success) {
       return reply.code(400).send({ error: "Invalid gem id" });
     }
-
-    const gems = await sql`
-      select
-        id, name, category, address, apple_place_id, google_maps_url,
-        first_finder_id, find_count, upvotes, downvotes, created_at,
-        st_y(location::geometry) as lat,
-        st_x(location::geometry) as lng
-      from gems
-      where id = ${parsed.data.id}
-      limit 1
-    `;
-    const gem = gems[0];
-    if (!gem) {
-      return reply.code(404).send({ error: "Gem not found" });
-    }
-
-    if (await isGemHiddenFromViewer(request.user.id, gem.id as string)) {
-      return reply.code(404).send({ error: "Gem not found" });
-    }
-
-    const viewerId = request.user.id;
-    const [finds, stashRows, myFind, myVote] = await Promise.all([
-      sql`
-        select
-          f.id, f.gem_id, f.user_id, f.description, f.liked, f.disliked,
-          f.tags, f.created_at,
-          u.handle, u.display_name
-        from finds f
-        join users u on u.id = f.user_id
-        where f.gem_id = ${gem.id}
-          and not exists (
-            select 1 from blocks b
-            where b.blocker_id = ${viewerId} and b.blocked_id = f.user_id
-          )
-          and not exists (
-            select 1 from reports r
-            where r.reporter_id = ${viewerId} and r.find_id = f.id
-          )
-        order by f.created_at asc
-      `,
-      sql<{ gem_id: string }[]>`
-        select gem_id from stash
-        where user_id = ${request.user.id} and gem_id = ${gem.id}
-        limit 1
-      `,
-      sql<{ id: string }[]>`
-        select id from finds
-        where gem_id = ${gem.id} and user_id = ${request.user.id}
-        limit 1
-      `,
-      getMyVote(gem.id as string, request.user.id),
-    ]);
-
-    return {
-      id: gem.id,
-      name: gem.name,
-      category: gem.category,
-      address: gem.address,
-      applePlaceId: gem.apple_place_id,
-      googleMapsUrl: gem.google_maps_url,
-      firstFinderId: gem.first_finder_id,
-      createdAt: gem.created_at,
-      lat: Number(gem.lat),
-      lng: Number(gem.lng),
-      status: serializeGemStatus(Number(gem.find_count)),
-      upvotes: Number(gem.upvotes),
-      downvotes: Number(gem.downvotes),
-      myVote,
-      isStashed: stashRows.length > 0,
-      myFindId: myFind[0]?.id ?? null,
-      finds: finds.map((f) => ({
-        id: f.id,
-        gemId: f.gem_id,
-        userId: f.user_id,
-        description: f.description,
-        liked: f.liked,
-        disliked: f.disliked,
-        tags: f.tags,
-        createdAt: f.created_at,
-        handle: f.handle,
-        displayName: f.display_name,
-        isFirstFind: f.user_id === gem.first_finder_id,
-      })),
-    };
-  });
+    const { id } = parsed.data;
+    const where = UUID_REGEX.test(id) ? sql`id = ${id}` : sql`slug = ${id}`;
+    const detail = await gemDetail(where, request.viewer);
+    if (!detail) return reply.code(404).send({ error: "Gem not found" });
+    return detail;
+    },
+  );
 
   app.post(
     "/gems",
@@ -349,25 +385,37 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
         });
       }
 
-      try {
-        const result = await sql.begin(async (tx) => {
+      const clientPlace = body.city ? placeColumns({
+        city: body.city,
+        area: body.area ?? null,
+        country: body.country ?? null,
+      }) : null;
+
+      const insert = (slug: string) => sql.begin(async (tx) => {
           const gems = await tx`
             insert into gems (
-              name, category, location, address, apple_place_id,
-              google_maps_url, first_finder_id, find_count
+              name, slug, category, location, address, apple_place_id,
+              google_maps_url, first_finder_id, find_count,
+              city, area, country, city_slug, area_slug
             )
             values (
               ${body.name},
+              ${slug},
               ${body.category},
               st_makepoint(${body.lng}, ${body.lat})::geography,
               ${body.address ?? null},
               ${body.applePlaceId ?? null},
               ${body.googleMapsUrl ?? null},
               ${request.user.id},
-              1
+              1,
+              ${clientPlace?.city ?? null},
+              ${clientPlace?.area ?? null},
+              ${clientPlace?.country ?? null},
+              ${clientPlace?.city_slug ?? null},
+              ${clientPlace?.area_slug ?? null}
             )
             returning
-              id, name, category, address, apple_place_id, google_maps_url,
+              id, slug, name, category, address, apple_place_id, google_maps_url,
               first_finder_id, find_count, created_at,
               st_y(location::geometry) as lat,
               st_x(location::geometry) as lng
@@ -392,8 +440,23 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
           return { gem, find: finds[0]! };
         });
 
+      try {
+        let result: Awaited<ReturnType<typeof insert>> | undefined;
+        for (let attempt = 0; !result; attempt++) {
+          try {
+            result = await insert(gemSlug(body.name, attempt < 2 ? 4 : 8));
+          } catch (err) {
+            if (!isSlugConflict(err) || attempt >= 3) throw err;
+          }
+        }
+
+        if (!clientPlace) {
+          fillPlaceInBackground(result.gem.id as string, body.lat, body.lng, request.log);
+        }
+
         return reply.code(201).send({
           id: result.gem.id,
+          slug: result.gem.slug,
           name: result.gem.name,
           category: result.gem.category,
           address: result.gem.address,

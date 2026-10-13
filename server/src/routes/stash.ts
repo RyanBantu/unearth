@@ -13,6 +13,7 @@ export async function stashRoutes(app: FastifyInstance): Promise<void> {
     const rows = await sql`
       select
         g.id,
+        g.slug,
         g.name,
         g.category,
         g.address,
@@ -54,6 +55,7 @@ export async function stashRoutes(app: FastifyInstance): Promise<void> {
     return {
       gems: rows.map((g) => ({
         id: g.id,
+        slug: g.slug,
         name: g.name,
         category: g.category,
         address: g.address,

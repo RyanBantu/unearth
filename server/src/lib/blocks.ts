@@ -23,7 +23,7 @@ export async function isBlocked(
 
 /** True when the gem should be hidden from this viewer (blocks / reports). */
 export async function isGemHiddenFromViewer(
-  viewerId: string,
+  viewerId: string | null,
   gemId: string,
 ): Promise<boolean> {
   const rows = await sql<{ hide: boolean }[]>`
