@@ -1,9 +1,25 @@
-# App Store assets
+# App Store screenshots (10)
 
-## Screenshots — iPhone Dynamic Island (medium)
-- `01-onboarding.png` — 1179 × 2556
-- `02-dig.png` — 1179 × 2556
+All **1179 × 2556** — iPhone Dynamic Island (medium display)
 
-## Header asset (Product Page → Header)
-- `header-3840x1646.png` — 3840 × 1646
-- `header-5244x2950.png` — 5244 × 2950
+| # | File | Screen |
+|---|------|--------|
+| 1 | `01-onboarding.png` | Sign in |
+| 2 | `02-handle.png` | Pick handle |
+| 3 | `03-dig.png` | Dig map |
+| 4 | `04-nearby-list.png` | Nearby list |
+| 5 | `05-gem.png` | Gem detail |
+| 6 | `06-unearth.png` | Unearth form |
+| 7 | `07-stash.png` | Stash |
+| 8 | `08-activity.png` | Activity |
+| 9 | `09-profile.png` | Profile |
+| 10 | `10-share.png` | Share card |
+
+## Header (Product Page → Header)
+- `header-3840x1646.png`
+- `header-5244x2950.png`
+
+## iPad 13" (required for submission)
+Folder: `ipad-13/` — all **2048 × 2732**
+
+Same 10 scenes as iPhone. Upload under **iPad 13" display** in App Store Connect.
