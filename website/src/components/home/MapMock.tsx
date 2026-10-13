@@ -76,9 +76,9 @@ export function MapMock() {
           key={i}
           className={`map__pin ${p.active ? 'map__pin--active' : ''}`}
           style={{ left: `${p.x}%`, top: `${p.y}%` }}
-          initial={{ y: -80, opacity: 0, scale: 0.6 }}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
-          transition={{ type: 'spring', stiffness: 420, damping: 16, delay: 0.9 + i * 0.14 }}
+          initial={{ y: -22, scale: 0.85 }}
+          animate={{ y: 0, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 420, damping: 12, delay: 0.2 + i * 0.1 }}
           whileHover={{ y: -6, scale: 1.12 }}
         >
           <Pin polished={p.polished} active={p.active} />
@@ -87,9 +87,9 @@ export function MapMock() {
 
       <motion.div
         className="map__sheet"
-        initial={{ y: '120%' }}
+        initial={{ y: 28 }}
         animate={{ y: 0 }}
-        transition={{ type: 'spring', stiffness: 160, damping: 22, delay: 1.9 }}
+        transition={{ type: 'spring', stiffness: 160, damping: 16, delay: 0.5 }}
       >
         <span className="map__grabber" />
         <div className="map__sheet-head">

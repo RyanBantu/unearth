@@ -14,10 +14,10 @@ export function Hero() {
       if (prefersReducedMotion()) return
       gsap
         .timeline({ defaults: { ease: 'expo.out' } })
-        .from('.hero__eyebrow', { y: 20, opacity: 0, duration: 0.8 })
-        .from('.hero__word > span', { yPercent: 115, rotate: 6, duration: 1.1, stagger: 0.06 }, '-=0.5')
-        .from('.hero__strike', { scaleX: 0, transformOrigin: 'left center', duration: 0.7, ease: 'power3.inOut' }, '-=0.3')
-        .from('.hero__sub, .hero__actions', { y: 24, opacity: 0, duration: 0.9, stagger: 0.12 }, '-=0.5')
+        .from('.hero__eyebrow', { y: 14, duration: 0.8 })
+        .from('.hero__word > span', { y: 28, rotate: 3, duration: 1.1, stagger: 0.05 }, '<')
+        .from('.hero__strike', { scaleX: 0, transformOrigin: 'left center', duration: 0.7, ease: 'power3.inOut' }, '-=0.5')
+        .from('.hero__sub, .hero__actions', { y: 18, duration: 0.9, stagger: 0.1 }, '<')
 
       gsap.to('.hero__visual', {
         yPercent: -8,

@@ -29,9 +29,9 @@ export function Download() {
   return (
     <section className="download" id="download">
       <div className="download__inner" ref={ref}>
-        <h2 className="download__title">
+        <h2 className="download__title" aria-label="Go dig.">
           {trail.map((style, i) => (
-            <animated.span key={words[i]} style={style}>
+            <animated.span key={words[i]} style={style} aria-hidden="true">
               {words[i]}
             </animated.span>
           ))}

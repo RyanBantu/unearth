@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { Fragment, useRef } from 'react'
 import { gsap, prefersReducedMotion, ScrollTrigger, useGSAP } from '../../lib/gsap'
 import { TiltCard } from '../TiltCard'
 
@@ -48,9 +48,11 @@ export function Principles() {
   return (
     <section className="section" id="principles" ref={root}>
       <p className="kicker">Our principles</p>
-      <h2 className="section__title principles__title">
+      <h2 className="section__title principles__title" aria-label="Three rules we don't bend.">
         {'Three rules we don’t bend.'.split(' ').map((w, i) => (
-          <span key={i}>{w} </span>
+          <Fragment key={i}>
+            <span aria-hidden="true">{w}</span>{' '}
+          </Fragment>
         ))}
       </h2>
       <div className="principles">

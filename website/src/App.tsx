@@ -5,6 +5,12 @@ import { Nav } from './components/Nav'
 import { Footer } from './components/Footer'
 import Home from './pages/Home'
 import Privacy from './pages/Privacy'
+import Terms from './pages/Terms'
+
+const titles: Record<string, string> = {
+  '/privacy': 'Privacy Policy — Unearth',
+  '/terms': 'Terms of Use — Unearth',
+}
 
 function Page({ children }: { children: React.ReactNode }) {
   return (
@@ -23,16 +29,13 @@ export default function App() {
   const location = useLocation()
 
   useEffect(() => {
-    document.title =
-      location.pathname === '/privacy'
-        ? 'Privacy Policy — Unearth'
-        : "Unearth — the places that aren't on the top-10 lists"
+    document.title = titles[location.pathname] ?? "Unearth — the places that aren't on the top-10 lists"
   }, [location.pathname])
 
   return (
     <MotionConfig reducedMotion="user">
       <Nav />
-      <AnimatePresence mode="wait" onExitComplete={() => window.scrollTo(0, 0)}>
+      <AnimatePresence mode="wait" initial={false} onExitComplete={() => window.scrollTo(0, 0)}>
         <Routes location={location} key={location.pathname}>
           <Route
             path="/"
@@ -47,6 +50,14 @@ export default function App() {
             element={
               <Page>
                 <Privacy />
+              </Page>
+            }
+          />
+          <Route
+            path="/terms"
+            element={
+              <Page>
+                <Terms />
               </Page>
             }
           />

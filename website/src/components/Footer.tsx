@@ -16,6 +16,7 @@ export function Footer() {
         <nav className="footer__links" aria-label="Footer">
           <a href="/#how">How it works</a>
           <Link to="/privacy">Privacy Policy</Link>
+          <Link to="/terms">Terms of Use</Link>
           <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>
         </nav>
         <p className="footer__copy">© {year} Unearth. Made in India.</p>

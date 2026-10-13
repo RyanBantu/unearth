@@ -3,6 +3,8 @@ export const site = {
   operatorCity: 'Manipal',
   contactEmail: 'bantu.ryan@gmail.com',
   privacyEffectiveDate: '13 October 2026',
+  termsUpdatedDate: '13 October 2026',
+  guidelinesUrl: 'https://unearth-1o4a.onrender.com/guidelines',
   backupRetentionDays: 30,
   appStoreUrl: '#',
   // Optional line in your own words, shown under "Why we built it". Leave empty to hide.

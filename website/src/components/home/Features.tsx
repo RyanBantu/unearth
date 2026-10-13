@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, type Variants } from 'motion/react'
 import { Reveal } from '../Reveal'
+import { Icon, type IconName } from '../Icon'
 
 const activity = [
   '@asha also found Rooftop Filter Coffee',
@@ -45,7 +46,7 @@ function Levels() {
           key={name}
           className="levels__row"
           initial={{ width: '0%' }}
-          whileInView={{ width: `${40 + i * 30}%` }}
+          whileInView={{ width: `${60 + i * 20}%` }}
           viewport={{ once: true }}
           transition={{ duration: 1, delay: 0.2 + i * 0.15, ease: [0.22, 1, 0.36, 1] }}
         >
@@ -57,60 +58,60 @@ function Levels() {
   )
 }
 
-type Feature = { icon: string; title: string; body: string; wide?: boolean; extra?: React.ReactNode }
+type Feature = { icon: IconName; title: string; body: string; wide?: boolean; extra?: React.ReactNode }
 
 const features: Feature[] = [
   {
-    icon: '🗺️',
+    icon: 'map',
     title: 'Map-first Dig',
     body: 'Open the map anywhere and see what people nearby have unearthed, with distances from where you stand. No location? Browse and place pins by hand.',
     wide: true,
   },
   {
-    icon: '💬',
+    icon: 'notes',
     title: 'Loves & watch-outs',
     body: 'Every find says what was great and what to know before you go. Tag it as Food, Café, Viewpoint, Trail or Shop, and add a Google Maps link.',
   },
   {
-    icon: '🧭',
+    icon: 'match',
     title: 'Found it too?',
     body: 'Unearth spots when you’re posting a place someone already found, so your find stacks onto theirs instead of making a duplicate.',
   },
   {
-    icon: '🔖',
+    icon: 'stash',
     title: 'Your Stash',
     body: 'Save the gems you want to try. Your Stash is private, just for you.',
   },
   {
-    icon: '⚡️',
+    icon: 'activity',
     title: 'Activity',
     body: 'See when someone else finds your gem, when it gets Polished, and when a place goes mainstream.',
     wide: true,
     extra: <ActivityTicker />,
   },
   {
-    icon: '⛏️',
+    icon: 'gem',
     title: 'Prospector levels',
     body: 'Your profile grows with your finds. Every real discovery counts.',
     extra: <Levels />,
   },
   {
-    icon: '🪪',
+    icon: 'share',
     title: 'Share cards',
     body: 'Send a friend a clean card for any gem: “Unearthed by @you. Find it on Unearth.”',
   },
   {
-    icon: '👍',
+    icon: 'thumbs',
     title: 'Thumbs, not stars',
     body: 'A simple thumbs up or down on other people’s gems. No five-star averages to inflate or game.',
   },
   {
-    icon: '',
+    icon: 'apple',
     title: 'Sign in with Apple',
     body: 'One tap to start. Hide My Email works too. We don’t collect photos, contacts or ad identifiers.',
   },
   {
-    icon: '🛡️',
+    icon: 'shield',
     title: 'Report & block',
     body: 'Report anything that breaks the rules and block anyone you’d rather not see. Every report gets reviewed.',
   },
@@ -144,8 +145,8 @@ export function Features() {
             whileHover={{ y: -6 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           >
-            <span className={`feature__icon ${f.icon === '' ? 'feature__icon--apple' : ''}`} aria-hidden="true">
-              {f.icon}
+            <span className={`feature__icon ${f.icon === 'apple' ? 'feature__icon--apple' : ''}`}>
+              <Icon name={f.icon} size={22} />
             </span>
             <h3>{f.title}</h3>
             <p>{f.body}</p>

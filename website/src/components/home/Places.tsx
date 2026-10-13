@@ -1,10 +1,11 @@
 import { useRef } from 'react'
 import { gsap, prefersReducedMotion, useGSAP } from '../../lib/gsap'
+import { Icon, type IconName } from '../Icon'
 
-const places = [
-  { emoji: '🥞', text: 'The dosa stall with no sign.' },
-  { emoji: '☕️', text: 'The café three floors up that only regulars know.' },
-  { emoji: '🌄', text: 'The viewpoint at the end of a dirt road.' },
+const places: { icon: IconName; text: string }[] = [
+  { icon: 'food', text: 'The dosa stall with no sign.' },
+  { icon: 'coffee', text: 'The café three floors up that only regulars know.' },
+  { icon: 'viewpoint', text: 'The viewpoint at the end of a dirt road.' },
 ]
 
 export function Places() {
@@ -18,7 +19,7 @@ export function Places() {
       })
       tl.from('.places__item', { opacity: 0.12, x: -40, stagger: 0.4, ease: 'power2.out' })
         .from('.places__not', { opacity: 0, y: 30 }, '+=0.1')
-        .from('.places__strike', { scaleX: 0, transformOrigin: 'left center', ease: 'power2.inOut' })
+        .from('.places__struck', { '--strike': '0%', ease: 'power2.inOut' })
         .from('.places__shared', { opacity: 0, scale: 0.92, ease: 'back.out(2)' })
     },
     { scope: root },
@@ -30,8 +31,8 @@ export function Places() {
       <ul className="places__list">
         {places.map((p) => (
           <li className="places__item" key={p.text}>
-            <span className="places__emoji" aria-hidden="true">
-              {p.emoji}
+            <span className="places__icon">
+              <Icon name={p.icon} size={30} />
             </span>
             {p.text}
           </li>
@@ -41,7 +42,6 @@ export function Places() {
         The places locals send their friends to.{' '}
         <span className="places__struck">
           Not the ones with 4,000 reviews and a queue out the door.
-          <i className="places__strike" aria-hidden="true" />
         </span>
       </p>
       <p className="places__shared">

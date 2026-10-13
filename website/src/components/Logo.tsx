@@ -1,8 +1,5 @@
 import { useRef } from 'react'
-import gsap from 'gsap'
-import { useGSAP } from '@gsap/react'
-
-gsap.registerPlugin(useGSAP)
+import { gsap, prefersReducedMotion, useGSAP } from '../lib/gsap'
 
 type Props = { size?: number; animate?: boolean }
 
@@ -11,14 +8,15 @@ export function Logo({ size = 36, animate = false }: Props) {
 
   useGSAP(
     () => {
-      if (!animate) return
-      const u = root.current?.querySelector<SVGPathElement>('.logo-u')
-      if (!u) return
-      const length = u.getTotalLength()
-      gsap
-        .timeline({ delay: 0.15 })
-        .fromTo(u, { strokeDasharray: length, strokeDashoffset: length }, { strokeDashoffset: 0, duration: 1.1, ease: 'power3.inOut' })
-        .fromTo('.logo-gem', { scale: 0, rotate: -90, transformOrigin: '50% 50%' }, { scale: 1, rotate: 0, duration: 0.6, ease: 'back.out(2.2)' }, '-=0.35')
+      if (!animate || prefersReducedMotion()) return
+      gsap.from('.logo-gem', {
+        y: -14,
+        rotate: -25,
+        transformOrigin: '50% 50%',
+        duration: 0.9,
+        delay: 0.1,
+        ease: 'bounce.out',
+      })
     },
     { scope: root, dependencies: [animate] },
   )
