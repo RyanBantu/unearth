@@ -8,7 +8,11 @@
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     {
-      "source": "/api/:path((?!page(?:$|\\?)|sitemap(?:$|\\?)|og/).*)",
+      "source": "/api/:path/:rest",
+      "destination": "https://unearth-1o4a.onrender.com/:path/:rest"
+    },
+    {
+      "source": "/api/:path",
       "destination": "https://unearth-1o4a.onrender.com/:path"
     },
     { "source": "/privacy", "destination": "/index.html" },
@@ -17,19 +21,10 @@
     { "source": "/g/:slug", "destination": "/api/page" },
     { "source": "/u/:handle", "destination": "/api/page" },
     { "source": "/lists/:city/:kind", "destination": "/api/page" },
-    {
-      "source": "/:city((?!privacy|terms|search|g|u|lists|api|assets)[a-z0-9-]+)",
-      "destination": "/api/page"
-    },
-    {
-      "source": "/:city((?!privacy|terms|search|g|u|lists|api|assets)[a-z0-9-]+)/:area([a-z0-9-]+)",
-      "destination": "/api/page"
-    },
-    {
-      "source": "/:city((?!privacy|terms|search|g|u|lists|api|assets)[a-z0-9-]+)/:area([a-z0-9-]+)/:category([a-z0-9-]+)",
-      "destination": "/api/page"
-    },
-    { "source": "/((?!api/|\\.well-known/).*)", "destination": "/index.html" }
+    { "source": "/:city/:area/:category", "destination": "/api/page" },
+    { "source": "/:city/:area", "destination": "/api/page" },
+    { "source": "/:city", "destination": "/api/page" },
+    { "source": "/{*path}", "destination": "/index.html" }
   ],
   "functions": {
     "api/page.ts": { "includeFiles": "dist/index.html" },
