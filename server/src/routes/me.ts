@@ -1,6 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { sql, type UserRow } from "../db.js";
+import { AccountLinkError, USER_COLUMNS, linkGoogleIdentity } from "../lib/accountLinking.js";
+import { GoogleAudienceError, verifyGoogleIdToken } from "../lib/google.js";
 import { HANDLE_REGEX } from "../lib/status.js";
 import { serializeUser } from "../lib/serialize.js";
 import { requireAuth, SESSION_COOKIE } from "../middleware/auth.js";
@@ -74,8 +76,7 @@ export async function meRoutes(app: FastifyInstance): Promise<void> {
       update users
       set agreed_terms_at = coalesce(agreed_terms_at, now())
       where id = ${request.user.id}
-      returning id, apple_sub, email, display_name, handle,
-                apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
+      returning ${sql.unsafe(USER_COLUMNS)}
     `;
     const user = updated[0]!;
     const stats = await userStats(user.id);
@@ -101,17 +102,64 @@ export async function meRoutes(app: FastifyInstance): Promise<void> {
       update users
       set handle = ${handle}
       where id = ${request.user.id}
-      returning id, apple_sub, email, display_name, handle,
-                apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
+      returning ${sql.unsafe(USER_COLUMNS)}
     `;
     const user = updated[0]!;
     const stats = await userStats(user.id);
     return serializeUser(user, stats);
   });
 
+  app.post("/me/link/google", { preHandler: requireAuth }, async (request, reply) => {
+    const parsed = z.object({ idToken: z.string().min(1) }).safeParse(request.body);
+    if (!parsed.success) {
+      return reply.code(400).send({ error: "Invalid body", details: parsed.error.flatten() });
+    }
+
+    let identity;
+    try {
+      identity = await verifyGoogleIdToken(parsed.data.idToken);
+    } catch (err) {
+      request.log.warn({ err }, "Google identity verification failed");
+      const message =
+        err instanceof GoogleAudienceError
+          ? "Invalid Google identity token audience"
+          : "Invalid Google identity token";
+      return reply.code(401).send({ error: message });
+    }
+
+    if (!identity.emailVerified) {
+      return reply.code(401).send({ error: "Google email is not verified" });
+    }
+
+    try {
+      const user = await linkGoogleIdentity(request.user, identity);
+      if (user.banned_at) {
+        return reply.code(403).send({ error: "Account banned" });
+      }
+      const stats = await userStats(user.id);
+      return serializeUser(user, stats);
+    } catch (err) {
+      if (err instanceof AccountLinkError) {
+        return reply.code(err.status).send({ error: err.message });
+      }
+      throw err;
+    }
+  });
+
   app.delete("/me", { preHandler: requireAuth }, async (request, reply) => {
     await revokeAppleForUser(request.user);
+    const touched = await sql<{ gem_id: string }[]>`
+      select distinct gem_id from finds where user_id = ${request.user.id}
+    `;
     await sql`delete from users where id = ${request.user.id}`;
+    if (touched.length > 0) {
+      const gemIds = touched.map((row) => row.gem_id);
+      await sql`
+        delete from gems
+        where id = any(${gemIds}::uuid[])
+          and not exists (select 1 from finds f where f.gem_id = gems.id)
+      `;
+    }
     reply.clearCookie(SESSION_COOKIE, { path: "/" });
     return reply.code(204).send();
   });

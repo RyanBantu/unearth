@@ -37,3 +37,5 @@ services:
         sync: false
       - key: PRERENDER_TOKEN
         sync: false
+      - key: GOOGLE_WEB_CLIENT_ID
+        sync: false

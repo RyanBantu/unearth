@@ -12,8 +12,9 @@ export async function findDuplicateCandidates(params: {
   name: string;
   category: GemCategory;
   applePlaceId?: string | null;
+  googlePlaceId?: string | null;
 }): Promise<MatchCandidateRow[]> {
-  const { lat, lng, name, category, applePlaceId } = params;
+  const { lat, lng, name, category, applePlaceId, googlePlaceId } = params;
 
   if (applePlaceId) {
     const byPlace = await sql<MatchCandidateRow[]>`
@@ -30,6 +31,29 @@ export async function findDuplicateCandidates(params: {
         address
       from gems
       where apple_place_id = ${applePlaceId}
+        and hidden_at is null
+      limit 1
+    `;
+    if (byPlace.length > 0) {
+      return byPlace;
+    }
+  }
+
+  if (googlePlaceId) {
+    const byPlace = await sql<MatchCandidateRow[]>`
+      select
+        id,
+        slug,
+        name,
+        category,
+        find_count,
+        st_distance(location, st_makepoint(${lng}, ${lat})::geography) as distance_m,
+        1.0::float8 as name_sim,
+        st_y(location::geometry) as lat,
+        st_x(location::geometry) as lng,
+        address
+      from gems
+      where google_place_id = ${googlePlaceId}
         and hidden_at is null
       limit 1
     `;

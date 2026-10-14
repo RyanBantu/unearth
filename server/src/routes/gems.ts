@@ -47,6 +47,7 @@ const matchQuery = z.object({
   name: z.string().trim().min(1).max(200),
   category: categoryEnum,
   applePlaceId: z.string().min(1).optional(),
+  googlePlaceId: z.string().min(1).optional(),
 });
 
 const gemIdParams = z.object({
@@ -68,6 +69,7 @@ const createGemBody = z.object({
   lng: z.number().min(-180).max(180),
   address: z.string().trim().max(500).optional().nullable(),
   applePlaceId: z.string().min(1).optional().nullable(),
+  googlePlaceId: z.string().min(1).optional().nullable(),
   googleMapsUrl: z
     .string()
     .url()
@@ -114,7 +116,7 @@ function voteRateLimitByUser(request: FastifyRequest): string {
 async function gemDetail(where: PendingQuery<Row[]>, viewer: UserRow | null) {
   const gems = await sql`
     select
-      id, slug, name, category, address, apple_place_id, google_maps_url,
+      id, slug, name, category, address, apple_place_id, google_place_id, google_maps_url,
       first_finder_id, find_count, upvotes, downvotes, created_at,
       city, area, country, city_slug, area_slug,
       st_y(location::geometry) as lat,
@@ -174,6 +176,7 @@ async function gemDetail(where: PendingQuery<Row[]>, viewer: UserRow | null) {
     findCount: Number(gem.find_count),
     firstFinderHandle: firstFind?.handle ?? null,
     applePlaceId: gem.apple_place_id,
+    googlePlaceId: gem.google_place_id ?? null,
     googleMapsUrl: gem.google_maps_url,
     firstFinderId: gem.first_finder_id,
     createdAt: gem.created_at,
@@ -313,13 +316,14 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: "Invalid query", details: parsed.error.flatten() });
     }
 
-    const { lat, lng, name, category, applePlaceId } = parsed.data;
+    const { lat, lng, name, category, applePlaceId, googlePlaceId } = parsed.data;
     const candidates = await findDuplicateCandidates({
       lat,
       lng,
       name,
       category,
       applePlaceId,
+      googlePlaceId,
     });
 
     return {
@@ -370,15 +374,19 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
         name: body.name,
         category: body.category,
         applePlaceId: body.applePlaceId,
+        googlePlaceId: body.googlePlaceId,
       });
 
       const strong = candidates.filter(
         (c) => Number(c.name_sim) > DUPLICATE_CONFLICT_NAME_SIM,
       );
-      // Exact Apple Place ID match is always a strong conflict unless confirmedNew.
-      const appleExact = body.applePlaceId && candidates.length === 1 && Number(candidates[0]!.name_sim) >= 1;
+      // Exact Apple or Google Place ID match is always a strong conflict unless confirmedNew.
+      const placeExact =
+        (body.applePlaceId || body.googlePlaceId) &&
+        candidates.length === 1 &&
+        Number(candidates[0]!.name_sim) >= 1;
 
-      if ((strong.length > 0 || appleExact) && !body.confirmedNew) {
+      if ((strong.length > 0 || placeExact) && !body.confirmedNew) {
         return reply.code(409).send({
           error: "Possible duplicate gem",
           candidates: candidates.map(serializeMatchCandidate),
@@ -394,7 +402,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
       const insert = (slug: string) => sql.begin(async (tx) => {
           const gems = await tx`
             insert into gems (
-              name, slug, category, location, address, apple_place_id,
+              name, slug, category, location, address, apple_place_id, google_place_id,
               google_maps_url, first_finder_id, find_count,
               city, area, country, city_slug, area_slug
             )
@@ -405,6 +413,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
               st_makepoint(${body.lng}, ${body.lat})::geography,
               ${body.address ?? null},
               ${body.applePlaceId ?? null},
+              ${body.googlePlaceId ?? null},
               ${body.googleMapsUrl ?? null},
               ${request.user.id},
               1,
@@ -415,7 +424,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
               ${clientPlace?.area_slug ?? null}
             )
             returning
-              id, slug, name, category, address, apple_place_id, google_maps_url,
+              id, slug, name, category, address, apple_place_id, google_place_id, google_maps_url,
               first_finder_id, find_count, created_at,
               st_y(location::geometry) as lat,
               st_x(location::geometry) as lng
@@ -461,6 +470,7 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
           category: result.gem.category,
           address: result.gem.address,
           applePlaceId: result.gem.apple_place_id,
+          googlePlaceId: result.gem.google_place_id ?? null,
           googleMapsUrl: result.gem.google_maps_url,
           firstFinderId: result.gem.first_finder_id,
           createdAt: result.gem.created_at,
@@ -485,6 +495,11 @@ export async function gemsRoutes(app: FastifyInstance): Promise<void> {
         if (message.includes("gems_apple_place_id_key")) {
           return reply.code(409).send({
             error: "A gem with this Apple Place ID already exists",
+          });
+        }
+        if (message.includes("gems_google_place_id_key")) {
+          return reply.code(409).send({
+            error: "A gem with this Google Place ID already exists",
           });
         }
         throw err;

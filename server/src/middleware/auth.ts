@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { sessionUserId, verifyAccessToken } from "../lib/tokens.js";
 import { sql, type UserRow } from "../db.js";
+import { USER_COLUMNS } from "../lib/accountLinking.js";
 import { webSignInEnabled } from "../lib/flags.js";
 
 declare module "fastify" {
@@ -23,9 +24,7 @@ type AuthResult = { user: UserRow } | AuthFailure | null;
 
 async function loadUser(userId: string): Promise<UserRow | undefined> {
   const rows = await sql<UserRow[]>`
-    select
-      id, apple_sub, email, display_name, handle,
-      apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
+    select ${sql.unsafe(USER_COLUMNS)}
     from users
     where id = ${userId}
     limit 1

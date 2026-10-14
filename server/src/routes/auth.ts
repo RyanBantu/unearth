@@ -4,12 +4,11 @@ import { sql, type UserRow } from "../db.js";
 import {
   appleClientId,
   decryptAppleRefreshToken,
-  encryptAppleRefreshToken,
   exchangeAppleAuthorizationCode,
   revokeAppleToken,
   verifyAppleIdentityToken,
-  type AppleIdentity,
 } from "../lib/apple.js";
+import { USER_COLUMNS, upsertAppleUser, upsertGoogleUser } from "../lib/accountLinking.js";
 import { serializeUser } from "../lib/serialize.js";
 import {
   issueTokenPair,
@@ -21,6 +20,7 @@ import {
 } from "../lib/tokens.js";
 import { SESSION_COOKIE } from "../middleware/auth.js";
 import { devAuthEnabled, webSignInEnabled } from "../lib/flags.js";
+import { GoogleAudienceError, verifyGoogleIdToken } from "../lib/google.js";
 
 const appleBody = z.object({
   identityToken: z.string().min(1),
@@ -41,6 +41,10 @@ const logoutBody = z.object({
   refreshToken: z.string().min(1),
 });
 
+const googleBody = z.object({
+  idToken: z.string().min(1),
+});
+
 const webAppleBody = z.object({
   idToken: z.string().min(1),
   code: z.string().min(1),
@@ -56,53 +60,6 @@ const webAppleBody = z.object({
     })
     .optional(),
 });
-
-const USER_COLUMNS = `id, apple_sub, email, display_name, handle,
-  apple_refresh_token_enc, created_at, agreed_terms_at, banned_at`;
-
-/**
- * Find or create the user for a verified Apple identity. Email and name are saved
- * on first sign-in only (Apple sends them once). `clientId` null = the iOS bundle ID.
- */
-async function upsertAppleUser(params: {
-  identity: AppleIdentity;
-  displayName: string | null;
-  appleRefreshToken?: string;
-  clientId: string | null;
-}): Promise<UserRow> {
-  const { identity, displayName, appleRefreshToken, clientId } = params;
-  const encRefresh = appleRefreshToken ? encryptAppleRefreshToken(appleRefreshToken) : null;
-
-  const existing = await sql<UserRow[]>`
-    select ${sql.unsafe(USER_COLUMNS)}
-    from users
-    where apple_sub = ${identity.sub}
-    limit 1
-  `;
-
-  if (existing[0]) {
-    if (!encRefresh) return existing[0];
-    await sql`
-      update users
-      set apple_refresh_token_enc = ${encRefresh}, apple_client_id = ${clientId}
-      where id = ${existing[0].id}
-    `;
-    return { ...existing[0], apple_refresh_token_enc: encRefresh };
-  }
-
-  const inserted = await sql<UserRow[]>`
-    insert into users (apple_sub, email, display_name, apple_refresh_token_enc, apple_client_id)
-    values (
-      ${identity.sub},
-      ${identity.email ?? null},
-      ${displayName},
-      ${encRefresh},
-      ${clientId}
-    )
-    returning ${sql.unsafe(USER_COLUMNS)}
-  `;
-  return inserted[0]!;
-}
 
 function displayNameFromFullName(
   fullName?: { givenName?: string; familyName?: string },
@@ -159,6 +116,43 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     };
   });
 
+  app.post("/auth/google", async (request, reply) => {
+    const parsed = googleBody.safeParse(request.body);
+    if (!parsed.success) {
+      return reply.code(400).send({ error: "Invalid body", details: parsed.error.flatten() });
+    }
+
+    let identity;
+    try {
+      identity = await verifyGoogleIdToken(parsed.data.idToken);
+    } catch (err) {
+      request.log.warn({ err }, "Google identity verification failed");
+      const message =
+        err instanceof GoogleAudienceError
+          ? "Invalid Google identity token audience"
+          : "Invalid Google identity token";
+      return reply.code(401).send({ error: message });
+    }
+
+    if (!identity.emailVerified) {
+      return reply.code(401).send({ error: "Google email is not verified" });
+    }
+
+    const user = await upsertGoogleUser(identity);
+    if (user.banned_at) {
+      return reply.code(403).send({ error: "Account banned" });
+    }
+
+    const tokens = await issueTokenPair(user.id);
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      user: serializeUser(user),
+      needsHandle: !user.handle,
+      needsTerms: !user.agreed_terms_at,
+    };
+  });
+
   app.post("/auth/refresh", async (request, reply) => {
     const parsed = refreshBody.safeParse(request.body);
     if (!parsed.success) {
@@ -171,8 +165,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     }
 
     const users = await sql<UserRow[]>`
-      select id, apple_sub, email, display_name, handle,
-             apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
+      select ${sql.unsafe(USER_COLUMNS)}
       from users
       where id = ${rotated.userId}
       limit 1
@@ -285,8 +278,7 @@ function devAuthRoute(app: FastifyInstance): void {
 
     const appleSub = `dev:${body.data.handle ?? "mock"}`;
     const existing = await sql<UserRow[]>`
-      select id, apple_sub, email, display_name, handle,
-             apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
+      select ${sql.unsafe(USER_COLUMNS)}
       from users
       where apple_sub = ${appleSub}
       limit 1
@@ -304,8 +296,7 @@ function devAuthRoute(app: FastifyInstance): void {
           ${"Dev User"},
           ${body.data.handle ?? "devuser"}
         )
-        returning id, apple_sub, email, display_name, handle,
-                  apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
+        returning ${sql.unsafe(USER_COLUMNS)}
       `;
       user = inserted[0]!;
     }

@@ -14,7 +14,8 @@ export const sql = postgres(databaseUrl, {
 
 export type UserRow = {
   id: string;
-  apple_sub: string;
+  apple_sub: string | null;
+  google_sub: string | null;
   email: string | null;
   display_name: string | null;
   handle: string | null;

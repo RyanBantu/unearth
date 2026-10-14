@@ -1,0 +1,7 @@
+# Copy to local.properties (never commit that file).
+sdk.dir=/Users/YOU/Library/Android/sdk
+MAPS_API_KEY=your-android-maps-and-places-key
+GOOGLE_WEB_CLIENT_ID=your-web-oauth-client-id.apps.googleusercontent.com
+# Optional: debug builds use production (https://unearth-1o4a.onrender.com) by default,
+# matching iOS. Set this only when you want the emulator to hit a local API.
+# DEBUG_API_BASE_URL=http://10.0.2.2:3000

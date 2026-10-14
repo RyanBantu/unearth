@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { sql, type UserRow } from "../db.js";
+import { USER_COLUMNS } from "../lib/accountLinking.js";
 import { isBlocked } from "../lib/blocks.js";
 import { serializeGemStatus, serializeUser } from "../lib/serialize.js";
 import { optionalAuth } from "../middleware/auth.js";
@@ -19,8 +20,7 @@ export async function usersRoutes(app: FastifyInstance): Promise<void> {
 
     const handle = parsed.data.handle.toLowerCase().replace(/^@/, "");
     const users = await sql<UserRow[]>`
-      select id, apple_sub, email, display_name, handle,
-             apple_refresh_token_enc, created_at, agreed_terms_at, banned_at
+      select ${sql.unsafe(USER_COLUMNS)}
       from users
       where handle = ${handle}
       limit 1
