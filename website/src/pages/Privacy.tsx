@@ -89,8 +89,8 @@ export default function Privacy() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45, duration: 0.6 }}
         >
-          This policy explains what information the Unearth app and website (“Unearth”, “we”, “us”) collect, how we use
-          it, and your choices. Unearth is operated from {site.operatorCity}, India.
+          This policy explains what information the Unearth iOS app, Android app, and website (“Unearth”, “we”, “us”)
+          collect, how we use it, and your choices. Unearth is operated from {site.operatorCity}, India.
         </motion.p>
         <motion.div
           className="policy__short"
@@ -129,9 +129,18 @@ export default function Privacy() {
             <h3>Account information</h3>
             <ul>
               <li>
-                When you use Sign in with Apple, Apple gives us a unique account identifier, and, if you choose to share
-                them, your name and email address. If you choose “Hide My Email”, we receive an Apple relay address
-                instead of your real email.
+                <strong>iPhone (Sign in with Apple):</strong> Apple gives us a unique account identifier, and, if you
+                choose to share them, your name and email address. If you choose “Hide My Email”, we receive an Apple
+                relay address instead of your real email.
+              </li>
+              <li>
+                <strong>Android (Google sign-in):</strong> Google gives us a unique account identifier, your verified
+                email address, and the name on your Google account.
+              </li>
+              <li>
+                If you sign in with Apple on iPhone and Google on Android using the same verified email, we link those
+                sign-ins to one Unearth account so your handle and finds stay together. We do not auto-link Apple Hide
+                My Email addresses.
               </li>
               <li>The handle (username) you choose.</li>
               <li>The date you agreed to our Terms of Use.</li>
@@ -162,8 +171,25 @@ export default function Privacy() {
                 only locations we store are the locations of gems you choose to post.
               </li>
               <li>
-                You can turn off location access anytime in iOS Settings. You can still browse the map and place pins
-                manually.
+                You can turn off location access anytime in iOS Settings or Android settings. You can still browse the
+                map and place pins manually.
+              </li>
+            </ul>
+
+            <h3>Maps and places</h3>
+            <ul>
+              <li>
+                On iPhone, maps and place search use Apple Maps. On Android, maps and place search use Google Maps and
+                Google Places. Those providers may process map interactions and approximate location to show the map and
+                suggest places, under their own privacy policies.
+              </li>
+            </ul>
+
+            <h3>Website</h3>
+            <ul>
+              <li>
+                The public website is for discovering gems. Browsing it does not require an account. If web sign-in is
+                enabled, it uses Sign in with Apple the same way as the iPhone app.
               </li>
             </ul>
 
@@ -173,6 +199,7 @@ export default function Privacy() {
                 Our servers keep standard logs (such as IP address, device and app version, and error details) to keep
                 the service secure and fix problems. Logs are kept for a limited time.
               </li>
+              <li>We store authentication tokens on the device so you stay signed in.</li>
             </ul>
             <p className="policy__callout">
               We don’t collect photos, contacts, payment information, or advertising identifiers.
@@ -203,13 +230,19 @@ export default function Privacy() {
                 provide their service to us:
                 <ul className="providers">
                   <li>
-                    <b>Apple</b> Sign in with Apple and Apple Maps
+                    <b>Apple</b> Sign in with Apple and Apple Maps (iPhone)
+                  </li>
+                  <li>
+                    <b>Google</b> Google sign-in, Google Maps, and Places (Android)
                   </li>
                   <li>
                     <b>Render</b> server hosting
                   </li>
                   <li>
                     <b>Neon</b> database hosting
+                  </li>
+                  <li>
+                    <b>Vercel</b> website hosting
                   </li>
                 </ul>
               </li>
@@ -242,10 +275,10 @@ export default function Privacy() {
               <li>
                 <strong>Deletion:</strong> delete individual finds in the app, or your whole account in{' '}
                 <span className="kbd">Profile → Settings → Delete account</span>. This also revokes Unearth’s access to
-                your Apple ID.
+                your Apple ID or Google account where possible.
               </li>
               <li>
-                <strong>Location:</strong> turn location access on or off in iOS Settings.
+                <strong>Location:</strong> turn location access on or off in iOS Settings or Android settings.
               </li>
               <li>
                 <strong>Other requests:</strong> depending on where you live (including under India’s Digital Personal
@@ -272,7 +305,9 @@ export default function Privacy() {
           <Section id="changes" n={8}>
             <p>
               We may update this policy. If we make significant changes, we’ll let you know in the app. The effective
-              date above shows when it was last updated.
+              date above shows when it was last updated. The same policy is published at{' '}
+              <a href="https://unearth.vercel.app/privacy">unearth.vercel.app/privacy</a> and{' '}
+              <a href="https://unearth-1o4a.onrender.com/privacy">unearth-1o4a.onrender.com/privacy</a>.
             </p>
           </Section>
 

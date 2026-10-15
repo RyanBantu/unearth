@@ -39,29 +39,35 @@ function htmlPage(title: string, bodyHtml: string): string {
 }
 
 const privacyBody = `
-<p class="meta">Last updated: 13 October 2026</p>
-<p>Unearth (“we”, “the app”) helps people share little-known public places on a map. This policy explains what we collect and why.</p>
+<p class="meta">Last updated: 15 October 2026</p>
+<p>Unearth (“we”) helps people share little-known public places on a map. This policy covers the Unearth iOS app, Android app, and website.</p>
+<p>The short version: we collect only what Unearth needs to work. We don’t sell your data, we don’t show ads, and we don’t track you across other apps or websites.</p>
 <h2>What we collect</h2>
 <ul>
-  <li><strong>Account:</strong> Sign in with Apple identity (Apple user id), optional email/name Apple provides, and the handle you choose.</li>
-  <li><strong>Location (when you allow it):</strong> Your device location while you use Dig, so nearby gems and distances can be shown. We request When In Use access only — we do not track you in the background.</li>
-  <li><strong>Content you post:</strong> Gem names, categories, map pins, descriptions, liked/didn’t-like notes, tags, optional Google Maps links, and stash saves.</li>
-  <li><strong>Reports:</strong> If you report a gem or find, we store the report reason and related ids so we can review it.</li>
-  <li><strong>Technical:</strong> Authentication tokens needed to keep you signed in.</li>
+  <li><strong>Account (iPhone):</strong> Sign in with Apple identifier, and optional name/email Apple provides. Hide My Email gives us an Apple relay address.</li>
+  <li><strong>Account (Android):</strong> Google sign-in identifier, verified email, and the name on your Google account.</li>
+  <li><strong>Account linking:</strong> if you use Apple on iPhone and Google on Android with the same verified email, we link those sign-ins to one Unearth account. We do not auto-link Apple Hide My Email addresses.</li>
+  <li><strong>Handle:</strong> the username you choose, and the date you agreed to the Terms of Use.</li>
+  <li><strong>Location (when you allow it):</strong> your device location while you use the app, so nearby gems and distances can be shown. We request When In Use / while-using access only — we do not track you in the background. We don’t store location history; the only locations we keep are gems you post.</li>
+  <li><strong>Maps:</strong> iPhone uses Apple Maps; Android uses Google Maps and Places, which may process map use and approximate location under Google’s policies.</li>
+  <li><strong>Content you post:</strong> gem names, categories, map pins, descriptions, liked/didn’t-like notes, tags, optional Google Maps links, stash saves, votes, reports, and blocks.</li>
+  <li><strong>Technical:</strong> authentication tokens on the device, and short-lived server logs (IP, device/app version, errors).</li>
 </ul>
+<p>We don’t collect photos, contacts, payment information, or advertising identifiers.</p>
 <h2>How we use it</h2>
 <ul>
   <li>To run Dig, Unearth, Stash, Activity, and Profile.</li>
-  <li>To show your finds and Prospectors level to you (and public handle/finds where the product exposes them).</li>
-  <li>To enforce posting guidelines and handle abuse reports.</li>
-  <li>To revoke Sign in with Apple access if you delete your account.</li>
+  <li>To show your finds and Prospectors level (and public handle/finds where the product exposes them).</li>
+  <li>To detect duplicate places and keep Unearth safe (reports, Terms, spam).</li>
+  <li>To revoke Apple or Google sign-in access if you delete your account, where possible.</li>
 </ul>
 <h2>Sharing</h2>
-<p>We do not sell your personal data. Content you Unearth is shared with other Unearth users as part of the product. We use infrastructure providers (e.g. hosting and database) solely to operate the service.</p>
+<p>We do not sell your personal data. Your handle and posted gems/finds are public to other Unearth users (Stash, reports, and blocks are private). We use providers solely to operate the service: Apple (Sign in with Apple, Maps), Google (sign-in, Maps, Places), Render (API hosting), Neon (database), and Vercel (website). Providers may store data outside India, including in Singapore.</p>
 <h2>Retention &amp; deletion</h2>
-<p>You can delete your account in Profile → Delete account. That removes your user record and associated content we store, and revokes Apple token access where possible.</p>
+<p>You can delete your account in Profile → Settings → Delete account. That removes your user record and associated content we store, and revokes Apple or Google token access where possible. Gems that other people also found remain, without your write-up.</p>
 <h2>Contact</h2>
-<p>Questions about privacy: contact the developer listed on the App Store listing, or open an issue on <a href="https://github.com/RyanBantu/unearth">github.com/RyanBantu/unearth</a>.</p>
+<p>Questions: <a href="mailto:bantu.ryan@gmail.com">bantu.ryan@gmail.com</a>, the developer listed on the App Store or Play Store listing, or an issue on <a href="https://github.com/RyanBantu/unearth">github.com/RyanBantu/unearth</a>.</p>
+<p>This policy is also at <a href="https://unearth.vercel.app/privacy">unearth.vercel.app/privacy</a>.</p>
 `;
 
 const guidelinesBody = `
