@@ -64,7 +64,7 @@ const privacyBody = `
 <h2>Sharing</h2>
 <p>We do not sell your personal data. Your handle and posted gems/finds are public to other Unearth users (Stash, reports, and blocks are private). We use providers solely to operate the service: Apple (Sign in with Apple, Maps), Google (sign-in, Maps, Places), Render (API hosting), Neon (database), and Vercel (website). Providers may store data outside India, including in Singapore.</p>
 <h2>Retention &amp; deletion</h2>
-<p>You can delete your account in Profile → Settings → Delete account. That removes your user record and associated content we store, and revokes Apple or Google token access where possible. Gems that other people also found remain, without your write-up.</p>
+<p>You can delete your account in Profile → Settings → Delete account, or request deletion at <a href="https://unearth.vercel.app/delete-account">unearth.vercel.app/delete-account</a>. That removes your user record and associated content we store, and revokes Apple or Google token access where possible. Gems that other people also found remain, without your write-up.</p>
 <h2>Contact</h2>
 <p>Questions: <a href="mailto:bantu.ryan@gmail.com">bantu.ryan@gmail.com</a>, the developer listed on the App Store or Play Store listing, or an issue on <a href="https://github.com/RyanBantu/unearth">github.com/RyanBantu/unearth</a>.</p>
 <p>This policy is also at <a href="https://unearth.vercel.app/privacy">unearth.vercel.app/privacy</a>.</p>
@@ -109,9 +109,41 @@ const termsBody = `
 <p><a href="/privacy">Privacy Policy</a> · <a href="/guidelines">Posting Guidelines</a></p>
 `;
 
+const deleteAccountBody = `
+<p class="meta">For the Unearth app on Google Play, the App Store, and the website.</p>
+<p>You can delete your Unearth account and the data we store with it. Deletion is permanent.</p>
+<h2>Delete in the app</h2>
+<ol>
+  <li>Open Unearth and sign in.</li>
+  <li>Go to <strong>Profile → Settings → Delete account</strong>.</li>
+  <li>Confirm. This cannot be undone.</li>
+</ol>
+<h2>Request deletion by email</h2>
+<p>If you uninstalled the app or cannot sign in, email <a href="mailto:bantu.ryan@gmail.com?subject=Delete%20my%20Unearth%20account">bantu.ryan@gmail.com</a> from the address on your account (Google or Apple). Include your Unearth handle if you remember it.</p>
+<p>We delete the account after we can match the request to you, and aim to complete this within 30 days.</p>
+<h2>What we delete</h2>
+<ul>
+  <li>Your account, handle, and sign-in identifiers (Apple and/or Google)</li>
+  <li>Your finds, stash, votes, reports, blocks, and session tokens</li>
+  <li>Gems that nobody else found</li>
+</ul>
+<p>We also revoke Unearth’s access to your Apple ID or Google account where possible.</p>
+<h2>What may remain</h2>
+<ul>
+  <li>Gems that other people also found stay on the map, without your write-up</li>
+  <li>Backups are cleared within 30 days</li>
+  <li>A limited record if the account was banned for abuse, or if the law requires it</li>
+</ul>
+<p><a href="/privacy">Privacy Policy</a> · <a href="https://unearth.vercel.app/delete-account">unearth.vercel.app/delete-account</a></p>
+`;
+
 export async function legalRoutes(app: FastifyInstance): Promise<void> {
   app.get("/privacy", async (_request, reply) => {
     return reply.type("text/html; charset=utf-8").send(htmlPage("Privacy Policy", privacyBody));
+  });
+
+  app.get("/delete-account", async (_request, reply) => {
+    return reply.type("text/html; charset=utf-8").send(htmlPage("Delete your account", deleteAccountBody));
   });
 
   app.get("/guidelines", async (_request, reply) => {

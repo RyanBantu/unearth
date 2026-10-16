@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, useScroll, useSpring } from 'motion/react'
 import { site } from '../config'
 
@@ -274,7 +275,8 @@ export default function Privacy() {
               </li>
               <li>
                 <strong>Deletion:</strong> delete individual finds in the app, or your whole account in{' '}
-                <span className="kbd">Profile → Settings → Delete account</span>. This also revokes Unearth’s access to
+                <span className="kbd">Profile → Settings → Delete account</span>.                 If you cannot open the app, request
+                deletion on the <Link to="/delete-account">Delete account</Link> page. This also revokes Unearth’s access to
                 your Apple ID or Google account where possible.
               </li>
               <li>

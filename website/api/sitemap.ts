@@ -23,6 +23,7 @@ export async function GET(request: Request): Promise<Response> {
     loc(origin, '/search', undefined, 'weekly', '0.4'),
     loc(origin, '/privacy', undefined, 'yearly', '0.2'),
     loc(origin, '/terms', undefined, 'yearly', '0.2'),
+    loc(origin, '/delete-account', undefined, 'yearly', '0.2'),
     ...cities.map((c) => loc(origin, `/${c.citySlug}`, c.updatedAt, 'daily', '0.8')),
     ...cities.flatMap((c) => [
       loc(origin, `/lists/${c.citySlug}/top`, c.updatedAt, 'daily', '0.7'),

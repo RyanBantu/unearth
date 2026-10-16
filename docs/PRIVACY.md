@@ -34,7 +34,7 @@ We do not sell your personal data. Your handle and posted gems/finds are public 
 
 ## Retention & deletion
 
-You can delete your account in Profile → Settings → Delete account. That removes your user record and associated content we store, and revokes Apple or Google token access where possible. Gems that other people also found remain, without your write-up.
+You can delete your account in Profile → Settings → Delete account, or request deletion at [unearth.vercel.app/delete-account](https://unearth.vercel.app/delete-account) (also at [unearth-1o4a.onrender.com/delete-account](https://unearth-1o4a.onrender.com/delete-account)). That removes your user record and associated content we store, and revokes Apple or Google token access where possible. Gems that other people also found remain, without your write-up.
 
 ## Contact
 

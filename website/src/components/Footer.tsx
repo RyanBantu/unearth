@@ -18,6 +18,7 @@ export function Footer() {
           <Link to="/search">Search</Link>
           <Link to="/privacy">Privacy</Link>
           <Link to="/terms">Terms</Link>
+          <Link to="/delete-account">Delete account</Link>
           <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>
         </nav>
         <p className="footer__copy">© {year} Unearth. Made in India.</p>

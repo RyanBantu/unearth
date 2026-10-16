@@ -12,6 +12,7 @@ import { shouldRetry } from './app/queries'
 import Home from './pages/Home'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
+import DeleteAccount from './pages/DeleteAccount'
 import Search from './pages/Search'
 import Place from './pages/Place'
 import Gem from './pages/Gem'
@@ -77,6 +78,7 @@ export default function App() {
                   <Route path="/" element={<Page title="Unearth — the places that aren’t on the top-10 lists"><Home /></Page>} />
                   <Route path="/privacy" element={<Page title="Privacy Policy — Unearth"><Privacy /></Page>} />
                   <Route path="/terms" element={<Page title="Terms of Use — Unearth"><Terms /></Page>} />
+                  <Route path="/delete-account" element={<Page title="Delete your account — Unearth"><DeleteAccount /></Page>} />
                   <Route path="/search" element={<Page><Search /></Page>} />
                   <Route path="/g/:slug" element={<Page><Gem /></Page>} />
                   <Route path="/u/:handle" element={<Page><Profile /></Page>} />

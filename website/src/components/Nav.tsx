@@ -22,6 +22,7 @@ const sections = [
 const legal = [
   { to: '/privacy', label: 'Privacy' },
   { to: '/terms', label: 'Terms' },
+  { to: '/delete-account', label: 'Delete account' },
 ]
 
 const menu: Variants = {
